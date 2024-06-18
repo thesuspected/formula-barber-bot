@@ -2,25 +2,14 @@ import dotenv from 'dotenv'
 import { Telegraf } from 'telegraf'
 import { getMainKeyboard, getFeedbackKeyboard } from './keyboards.js'
 import { CMD, FB_BUTTONS } from './const.js'
+import { getStartMessage } from './helpers.js'
 
 dotenv.config()
 const { BOT_TOKEN } = process.env
 const bot = new Telegraf(BOT_TOKEN)
 
-bot.start((ctx) =>
-    ctx.replyWithHTML(
-        `Привет, ${ctx.from.first_name}!
-
-На связи Формула Барбершоп💈— твой проводник в мир стильных стрижек 💇‍♂️
-
-В боте ты можешь записаться к любимому мастеру, копить бонусы, получать напоминания и еще много чего полезного по кнопкам внизу ⬇️
-
-Мы очень рады новым гостям, приглашай друзей и получай скидку 🎁
-
-Также подписывайся на наши соцсети, чтобы быть в курсе всех акций и событий: inst, tg`,
-        getMainKeyboard()
-    )
-)
+// Сообщение от бота по команде Start
+bot.start((ctx) => ctx.replyWithHTML(getStartMessage(ctx.from.first_name), getMainKeyboard()))
 
 // Ссылка на рабочий акк админа
 bot.hears(CMD.ADMIN, (ctx) =>
