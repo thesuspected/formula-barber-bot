@@ -18,8 +18,14 @@ export const getFeedbackKeyboard = () => {
 }
 
 export const getstockskeyboard = () => {
-    return Markup.keyboard([
-        [STOCKS.INVITE_FR, STOCKS.PAIR_HAIR],
-        [STOCKS.BONUS_REVIEWS, STOCKS.BONUS_REFERENCES],
+    return Markup.inlineKeyboard([
+        [
+            Markup.button.callback(STOCKS.INVITE_FR, STOCKS.INVITE_FR),
+            Markup.button.callback(STOCKS.PAIR_HAIR, STOCKS.PAIR_HAIR),
+        ],
+        [
+            Markup.button.callback(STOCKS.BONUS_REVIEWS, STOCKS.BONUS_REVIEWS),
+            Markup.button.callback(STOCKS.BONUS_REFERENCES, STOCKS.BONUS_REFERENCES),
+        ],
     ]).resize()
 }

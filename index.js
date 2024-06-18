@@ -15,13 +15,13 @@ bot.hears(CMD.BONUS, (ctx) =>
     ctx.replyWithHTML(`Бонусы можно копить и оплачивать до 50% стоимости услуг в «Формуле»`, getstockskeyboard())
 )
 
-bot.hears(STOCKS.INVITE_FR, (ctx) => ctx.replyWithHTML(LARGE_TEXT.FRIENDS))
+bot.action(STOCKS.INVITE_FR, (ctx) => ctx.replyWithHTML(LARGE_TEXT.FRIENDS))
 
-bot.hears(STOCKS.PAIR_HAIR, (ctx) => ctx.replyWithHTML(LARGE_TEXT.DOUBLE_HAIR))
+bot.action(STOCKS.PAIR_HAIR, (ctx) => ctx.replyWithHTML(LARGE_TEXT.DOUBLE_HAIR))
 
-bot.hears(STOCKS.BONUS_REVIEWS, (ctx) => ctx.replyWithHTML(LARGE_TEXT.GIFT_REVIEWS))
+bot.action(STOCKS.BONUS_REVIEWS, (ctx) => ctx.replyWithHTML(LARGE_TEXT.GIFT_REVIEWS))
 
-bot.hears(STOCKS.BONUS_REFERENCES, (ctx) => ctx.replyWithHTML(LARGE_TEXT.GIFT_REFERENCES))
+bot.action(STOCKS.BONUS_REFERENCES, (ctx) => ctx.replyWithHTML(LARGE_TEXT.GIFT_REFERENCES))
 
 // Ссылка на рабочий акк админа
 bot.hears(CMD.ADMIN, (ctx) =>
