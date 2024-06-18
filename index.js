@@ -1,7 +1,7 @@
 import dotenv from 'dotenv'
 import { Telegraf } from 'telegraf'
-import { getMainKeyboard, getFeedbackKeyboard } from './keyboards.js'
-import { CMD, FB_BUTTONS } from './const.js'
+import { getMainKeyboard, getFeedbackKeyboard, getstockskeyboard } from './keyboards.js'
+import { CMD, FB_BUTTONS, LARGE_TEXT, STOCKS } from './const.js'
 import { getStartMessage } from './helpers.js'
 
 dotenv.config()
@@ -10,6 +10,18 @@ const bot = new Telegraf(BOT_TOKEN)
 
 // Сообщение от бота по команде Start
 bot.start((ctx) => ctx.replyWithHTML(getStartMessage(ctx.from.first_name), getMainKeyboard()))
+
+bot.hears(CMD.BONUS, (ctx) =>
+    ctx.replyWithHTML(`Бонусы можно копить и оплачивать до 50% стоимости услуг в «Формуле»`, getstockskeyboard())
+)
+
+bot.hears(STOCKS.INVITE_FR, (ctx) => ctx.replyWithHTML(LARGE_TEXT.FRIENDS))
+
+bot.hears(STOCKS.PAIR_HAIR, (ctx) => ctx.replyWithHTML(LARGE_TEXT.DOUBLE_HAIR))
+
+bot.hears(STOCKS.BONUS_REVIEWS, (ctx) => ctx.replyWithHTML(LARGE_TEXT.GIFT_REVIEWS))
+
+bot.hears(STOCKS.BONUS_REFERENCES, (ctx) => ctx.replyWithHTML(LARGE_TEXT.GIFT_REFERENCES))
 
 // Ссылка на рабочий акк админа
 bot.hears(CMD.ADMIN, (ctx) =>
