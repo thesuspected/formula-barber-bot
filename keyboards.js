@@ -1,10 +1,10 @@
-import { CMD, FB_BUTTONS, STOCKS } from './const.js'
+import { CMD, FB_BUTTONS, BACK_BUTTON } from './const.js'
 import { Markup } from 'telegraf'
 
 export const getMainKeyboard = () => {
     return Markup.keyboard([
-        [CMD.ADDRESS, CMD.ADMIN],
-        [CMD.FEEDBACK, CMD.INVITE, CMD.BONUS],
+        [CMD.ADDRESS, CMD.SCHEDULE],
+        [CMD.ADMIN, CMD.BONUS],
     ]).resize()
 }
 
@@ -17,15 +17,6 @@ export const getFeedbackKeyboard = () => {
     ])
 }
 
-export const getstockskeyboard = () => {
-    return Markup.inlineKeyboard([
-        [
-            Markup.button.callback(STOCKS.INVITE_FR, STOCKS.INVITE_FR),
-            Markup.button.callback(STOCKS.PAIR_HAIR, STOCKS.PAIR_HAIR),
-        ],
-        [
-            Markup.button.callback(STOCKS.BONUS_REVIEWS, STOCKS.BONUS_REVIEWS),
-            Markup.button.callback(STOCKS.BONUS_REFERENCES, STOCKS.BONUS_REFERENCES),
-        ],
-    ]).resize()
+export const getBackKeyboard = (action = BACK_BUTTON) => {
+    return Markup.inlineKeyboard([Markup.button.callback(action, action)]).resize()
 }
