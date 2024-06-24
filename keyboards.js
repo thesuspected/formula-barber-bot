@@ -17,6 +17,6 @@ export const getFeedbackKeyboard = () => {
     ])
 }
 
-export const getBackKeyboard = (action = BACK_BUTTON) => {
-    return Markup.inlineKeyboard([Markup.button.callback(action, action)]).resize()
+export const getBackKeyboard = (text = BACK_BUTTON, action = BACK_BUTTON) => {
+    return Markup.inlineKeyboard([Markup.button.callback(text, action)]).resize()
 }
