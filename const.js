@@ -2,7 +2,7 @@ export const CMD = {
     ADDRESS: '📍 Наш адрес',
     SCHEDULE: '📅 График работы',
     ADMIN: '👩🏼‍💼 Администратор',
-    BONUS: '🎁 Акции и бонусы',
+    BONUS: '🎁 Предложения и бонусы',
 }
 
 export const FB_BUTTONS = {
