@@ -13,3 +13,7 @@ export const FB_BUTTONS = {
 }
 
 export const BACK_BUTTON = '⬅️ Назад'
+
+export const SHARE = {
+    CONTACT: 'Поделиться контактом',
+}

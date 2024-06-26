@@ -1,6 +1,6 @@
 import dotenv from 'dotenv'
 import { Telegraf } from 'telegraf'
-import { getMainKeyboard } from './keyboards.js'
+import { getContactKeyboard, getMainKeyboard } from './keyboards.js'
 import { CMD, FB_BUTTONS } from './const.js'
 import { getStartMessage } from './helpers.js'
 import BonusComposer from './composers/bonus.composer.js'
@@ -11,14 +11,25 @@ const bot = new Telegraf(BOT_TOKEN)
 
 // 🎁 Акции и бонусы
 bot.use(BonusComposer)
-
+//ctx.replyWithHTML(getStartMessage(ctx.from.first_name), getMainKeyboard())
 // start
-bot.start((ctx) => ctx.replyWithHTML(getStartMessage(ctx.from.first_name), getMainKeyboard()))
-
+bot.start((ctx) => {
+    ctx.replyWithHTML(getStartMessage(ctx.from.first_name), getMainKeyboard())
+    if (true) {
+        ctx.replyWithHTML('Для участия в бонусной системе поделись с нами контактом', getContactKeyboard())
+    }
+})
+bot.on('contact', (ctx) => {
+    const contact = ctx.message.contact.phone_number
+    console.log('Hello Contact', contact)
+    ctx.replyWithHTML(getStartMessage(ctx.from.first_name), getMainKeyboard())
+})
 // 📍 Наш адрес
-bot.hears(CMD.ADDRESS, (ctx) =>
+bot.hears(CMD.ADDRESS, (ctx) => {
     ctx.replyWithHTML(`Мы располагаемся по адресу <a href="https://yandex.ru/maps/-/CDrTB2Ll">Чернышевского 52Б</a>`)
-)
+    if (true) {
+    }
+})
 // 👩🏼‍💼 Администратор
 bot.hears(CMD.ADMIN, (ctx) =>
     ctx.replyWithHTML(

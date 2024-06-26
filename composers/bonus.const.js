@@ -73,6 +73,10 @@ export const getReviewsKeyboard = (text = BACK_BUTTON, action = BACK_BUTTON) => 
         [
             Markup.button.webApp('🔴 Яндекс Карты', 'https://yandex.ru/maps/org/formula/106787443492/reviews'),
             Markup.button.webApp('🟢 2ГИС', 'https://2gis.ru/saratov/firm/70000001089511981/tab/reviews'),
+            Markup.button.webApp(
+                '🟡 YCLIENTS',
+                'https://n1149259.yclients.com/company/1057728/about?previousStepUrl=%2Fcompany%2F1057728%2Fpersonal%2Fmenu%3Fo%3D&o='
+            ),
         ],
         [Markup.button.callback(text, action)],
     ]).resize()
