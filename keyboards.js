@@ -1,5 +1,6 @@
 import { CMD, BACK_BUTTON, SHARE_CONTACT } from './const.js'
 import { Markup } from 'telegraf'
+import { BONUS } from './composers/bonus.const.js'
 
 export const getMainKeyboard = () => {
     return Markup.keyboard([
@@ -24,5 +25,12 @@ export const getAddressKeyboard = () => {
             '📹 Как пройти?',
             'https://www.instagram.com/s/aGlnaGxpZ2h0OjE3OTQ4Mjg1MjEwNjk2ODM4?story_media_id=3389435785817854881&igsh=eGNjNHNweXc5ZWc0'
         ),
+    ]).resize()
+}
+
+export const getSheduleKeyboard = () => {
+    return Markup.inlineKeyboard([
+        Markup.button.callback(BONUS.INVITE_FRIEND, BONUS.INVITE_FRIEND_FROM_SHEDULE),
+        Markup.button.callback(BONUS.PAIR_HAIR, BONUS.PAIR_HAIR_FROM_SHEDULE),
     ]).resize()
 }

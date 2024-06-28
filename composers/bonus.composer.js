@@ -13,12 +13,26 @@ composer.action(BONUS.INVITE_FRIEND, (ctx) =>
         ...getBackKeyboard(BONUS.BACK, BONUS.BACK),
     })
 )
+composer.action(BONUS.INVITE_FRIEND_FROM_SHEDULE, (ctx) => {
+    ctx.answerCbQuery()
+    ctx.replyWithHTML(BONUS_TEXT.INVITE_FRIEND, {
+        parse_mode: 'HTML',
+        ...getBackKeyboard(BONUS.BACK, BONUS.BACK),
+    })
+})
 composer.action(BONUS.PAIR_HAIR, (ctx) =>
     ctx.editMessageText(BONUS_TEXT.PAIR_HAIR, {
         parse_mode: 'HTML',
         ...getBackKeyboard(BONUS.BACK, BONUS.BACK),
     })
 )
+composer.action(BONUS.PAIR_HAIR_FROM_SHEDULE, (ctx) => {
+    ctx.answerCbQuery()
+    ctx.replyWithHTML(BONUS_TEXT.PAIR_HAIR, {
+        parse_mode: 'HTML',
+        ...getBackKeyboard(BONUS.BACK, BONUS.BACK),
+    })
+})
 composer.action(BONUS.BONUS_REVIEWS, (ctx) =>
     ctx.editMessageText(BONUS_TEXT.BONUS_REVIEWS, {
         parse_mode: 'HTML',

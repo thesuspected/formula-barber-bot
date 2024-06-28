@@ -3,10 +3,12 @@ import { BACK_BUTTON, CMD } from '../const.js'
 
 export const BONUS = {
     INVITE_FRIEND: '🤝🏻 Пригласи друга',
-    PAIR_HAIR: '💇🏼💇🏽Парная стрижка',
+    PAIR_HAIR: '💇🏼💇🏽 Парная стрижка',
     BONUS_REVIEWS: '💰 Бонусы за отзывы',
     BONUS_REFERENCES: '📸 Бонусы за упоминания',
     BACK: '⬅️ Назад к акциям',
+    INVITE_FRIEND_FROM_SHEDULE: 'INVITE_FRIEND_FROM_SHEDULE',
+    PAIR_HAIR_FROM_SHEDULE: 'INVITE_FRIEND_FROM_SHEDULE',
 }
 export const BONUS_TEXT = {
     INVITE_FRIEND: `<u><b>${BONUS.INVITE_FRIEND}</b></u> и получи бонусные рубли на счет 💸
