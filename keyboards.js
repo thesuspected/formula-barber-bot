@@ -1,4 +1,4 @@
-import { CMD, FB_BUTTONS, BACK_BUTTON, SHARE } from './const.js'
+import { CMD, FB_BUTTONS, BACK_BUTTON, SHARE_CONTACT } from './const.js'
 import { Markup } from 'telegraf'
 
 export const getMainKeyboard = () => {
@@ -9,7 +9,7 @@ export const getMainKeyboard = () => {
 }
 
 export const getContactKeyboard = () => {
-    return Markup.keyboard([Markup.button.contactRequest(SHARE.CONTACT)]).resize()
+    return Markup.keyboard([Markup.button.contactRequest(SHARE_CONTACT)]).resize()
 }
 
 export const getFeedbackKeyboard = () => {

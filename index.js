@@ -2,40 +2,43 @@ import dotenv from 'dotenv'
 import { Telegraf } from 'telegraf'
 import { getContactKeyboard, getMainKeyboard } from './keyboards.js'
 import { CMD, FB_BUTTONS } from './const.js'
-import { getStartMessage } from './helpers.js'
+import { getAdminMessage, getContactMessage, getContactPleasureMessage } from './helpers.js'
 import BonusComposer from './composers/bonus.composer.js'
 
 dotenv.config()
 const { BOT_TOKEN } = process.env
 const bot = new Telegraf(BOT_TOKEN)
 
+// Middleware
+bot.use(async (ctx, next) => {
+    console.log(ctx)
+    await next()
+})
+
 // 🎁 Акции и бонусы
 bot.use(BonusComposer)
-//ctx.replyWithHTML(getStartMessage(ctx.from.first_name), getMainKeyboard())
 // start
 bot.start((ctx) => {
-    ctx.replyWithHTML(getStartMessage(ctx.from.first_name), getMainKeyboard())
     if (true) {
-        ctx.replyWithHTML('Для участия в бонусной системе поделись с нами контактом', getContactKeyboard())
+        ctx.replyWithHTML(getContactMessage(ctx.from.first_name), getContactKeyboard())
     }
 })
 bot.on('contact', (ctx) => {
     const contact = ctx.message.contact.phone_number
     console.log('Hello Contact', contact)
-    ctx.replyWithHTML(getStartMessage(ctx.from.first_name), getMainKeyboard())
+    ctx.replyWithHTML(getContactPleasureMessage(), {
+        link_preview_options: {
+            is_disabled: true,
+        },
+        ...getMainKeyboard(),
+    })
 })
 // 📍 Наш адрес
 bot.hears(CMD.ADDRESS, (ctx) => {
     ctx.replyWithHTML(`Мы располагаемся по адресу <a href="https://yandex.ru/maps/-/CDrTB2Ll">Чернышевского 52Б</a>`)
-    if (true) {
-    }
 })
 // 👩🏼‍💼 Администратор
-bot.hears(CMD.ADMIN, (ctx) =>
-    ctx.replyWithHTML(
-        `По вопросам записи и работы барбершопа обращайтесь в аккаунт <a href="https://t.me/formula_barber">formula_barber</a>`
-    )
-)
+bot.hears(CMD.ADMIN, (ctx) => ctx.replyWithHTML(getAdminMessage()))
 
 // Оставить отзыв - Нажатие кнопки "Анонимно"
 bot.action(FB_BUTTONS.ANONIM, (ctx) =>

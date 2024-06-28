@@ -28,9 +28,17 @@ composer.action(BONUS.BONUS_REVIEWS, (ctx) =>
 composer.action(BONUS.BONUS_REFERENCES, (ctx) =>
     ctx.editMessageText(BONUS_TEXT.BONUS_REFERENCES, {
         parse_mode: 'HTML',
+        link_preview_options: {
+            is_disabled: true,
+        },
         ...getBackKeyboard(BONUS.BACK, BONUS.BACK),
     })
 )
-composer.action(BONUS.BACK, (ctx) => ctx.editMessageText(getBonusMessage(), getBonusKeyboard()))
+composer.action(BONUS.BACK, (ctx) =>
+    ctx.editMessageText(getBonusMessage(), {
+        parse_mode: 'HTML',
+        ...getBonusKeyboard(),
+    })
+)
 
 export default composer
