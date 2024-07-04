@@ -1,34 +1,16 @@
-import 'dotenv/config'
-import { Telegraf, session } from 'telegraf'
-import { getPhoneKeyboard, getMainKeyboard, getAddressKeyboard, getSheduleKeyboard } from './keyboards.js'
-import { CMD } from './const.js'
-import {
-    getAddressMessage,
-    getPhoneMessage,
-    getPhonePleasureMessage,
-    getSheduleMessage,
-    getStartMessage,
-} from './helpers.js'
-import BonusComposer from './composers/bonus.composer.js'
-import ContactComposer from './composers/contact.composer.js'
-import db from './config/firebase.js'
+import { Composer, session } from 'telegraf'
+import { getPhoneMessage, getPhonePleasureMessage, getStartMessage } from '../helpers.js'
+import { getMainKeyboard, getPhoneKeyboard } from '../keyboards.js'
+import db from '../config/firebase.js'
+import { sendBotMessage } from '../barber.js'
 
-const { BOT_TOKEN, ADMIN_CHAT_ID } = process.env
-const bot = new Telegraf(BOT_TOKEN)
-
-export async function sendBotMessage(chatId, text) {
-    await bot.telegram.sendMessage(chatId, text, {
-        parse_mode: 'HTML',
-        link_preview_options: {
-            is_disabled: true,
-        },
-    })
-}
+const composer = new Composer()
+const { ADMIN_CHAT_ID } = process.env
 
 // Session Middleware
-bot.use(session())
+composer.use(session())
 // Logger Middleware
-bot.use(async (ctx, next) => {
+composer.use(async (ctx, next) => {
     const log = `<a href="https://t.me/${ctx.from.username}">${ctx.from.username}</a>: ${ctx.message ? ctx.message.text ?? '-' : ctx}`
     console.log(log, `(chat_id: ${ctx.chat.id})`)
     await sendBotMessage(ADMIN_CHAT_ID, log)
@@ -36,7 +18,7 @@ bot.use(async (ctx, next) => {
     await next()
 })
 // Auth Middleware
-bot.use(async (ctx, next) => {
+composer.use(async (ctx, next) => {
     // Get phone_number
     if (ctx.message && ctx.message.contact) {
         await writeNewUser(ctx)
@@ -92,12 +74,8 @@ const writeNewUser = async (ctx) => {
     }
 }
 
-// 🎁 Предложения и бонусы
-bot.use(BonusComposer)
-// 👥 Контакты
-bot.use(ContactComposer)
 // start
-bot.start(async (ctx) => {
+composer.start(async (ctx) => {
     ctx.replyWithHTML(getStartMessage(ctx.from.first_name), {
         link_preview_options: {
             is_disabled: true,
@@ -105,32 +83,5 @@ bot.start(async (ctx) => {
         ...getMainKeyboard(),
     })
 })
-// 📍 Наш адрес
-bot.hears(CMD.ADDRESS, (ctx) => {
-    ctx.replyWithPhoto(
-        { source: 'images/map.png' },
-        {
-            caption: getAddressMessage(),
-            reply_markup: getAddressKeyboard().reply_markup,
-            parse_mode: 'HTML',
-        }
-    )
-})
-// 📅 График работы
-bot.hears(CMD.SCHEDULE, (ctx) => {
-    ctx.replyWithPhoto(
-        { source: 'images/friend.png' },
-        {
-            caption: getSheduleMessage(),
-            reply_markup: getSheduleKeyboard().reply_markup,
-            parse_mode: 'HTML',
-        }
-    )
-})
 
-bot.launch()
-console.log('bot start')
-
-// Остановка бота
-process.once('SIGINT', () => bot.stop('SIGINT'))
-process.once('SIGTERM', () => bot.stop('SIGTERM'))
+export default composer
