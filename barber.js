@@ -57,7 +57,8 @@ console.log('🤖 bot start')
 
 app.post('/hook', async (req, res) => {
     console.log('new webhook =', req.body)
-    const { staff, client, status, date } = req.body.data
+    const { status, data } = req.body
+    const { staff, client, date } = data
 
     // Берем номер телефона пользователя (без +7)
     const phoneNumber = client.phone.slice(client.phone.length - 10)
