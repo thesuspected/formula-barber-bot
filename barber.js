@@ -60,6 +60,10 @@ app.post('/hook', async (req, res) => {
     const { status, data } = req.body
     const { staff, client, date } = data
 
+    if (!client) {
+        return
+    }
+
     // Берем номер телефона пользователя (без +7)
     const phoneNumber = client.phone.slice(client.phone.length - 10)
     console.log('client phone =', phoneNumber)
