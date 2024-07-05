@@ -65,7 +65,7 @@ app.post('/hook', async (req, res) => {
     console.log('client phone =', phoneNumber)
 
     // Ищем его в базе данных
-    const user = await getUserByClientPhone(phoneNumber)
+    const user = await getUserByClientPhone(phoneNumber, client)
     if (user) {
         switch (status) {
             // Новая запись к мастеру
@@ -77,10 +77,6 @@ app.post('/hook', async (req, res) => {
                 await sendBotMessage(ADMIN_CHAT_ID, log)
                 break
         }
-    } else {
-        // Оповещаем, что пользователь не пользуется ботом
-        const log = `Пользователя с номером ${client.phone} нет в боте`
-        await sendBotMessage(ADMIN_CHAT_ID, log)
     }
 
     res.status(200).end()
@@ -94,16 +90,16 @@ const noticeUserAndAdminAboutNewEntry = async (user, staff, date) => {
     await sendBotMessage(ADMIN_CHAT_ID, getNewEntryAdminMessage(user, staff, dateString))
 }
 
-const getUserByClientPhone = async (phoneNumber) => {
+const getUserByClientPhone = async (phoneNumber, client) => {
     try {
         // Ищем пользователя по номеру телефона без префикса +7
         const findUserRes = await db.collection('barber-users').where(Filter.where('phone.number', '==', phoneNumber))
         const snapshot = await findUserRes.get()
 
         if (snapshot.empty) {
-            const err = `Пользователь с номером ${phoneNumber} не найден`
+            // Оповещаем, что пользователь не пользуется ботом
+            const err = `Пользователь ${client.name} с номером ${client.phone} не найден в боте`
             await sendBotMessage(ADMIN_CHAT_ID, err)
-            return
         }
         if (snapshot.size > 1) {
             const err = `Найдено несколько пользователей с одинаковым номером: ${phoneNumber}`
