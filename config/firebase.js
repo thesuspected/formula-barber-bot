@@ -1,5 +1,5 @@
 import { cert, initializeApp } from 'firebase-admin/app'
-import { getFirestore } from 'firebase-admin/firestore'
+import { getFirestore, Filter } from 'firebase-admin/firestore'
 
 const { SERVICE_ACCOUNT, DATABASE_URL } = process.env
 
@@ -9,4 +9,4 @@ initializeApp({
     databaseURL: DATABASE_URL,
 })
 const db = getFirestore()
-export default db
+export { db, Filter }

@@ -1,7 +1,7 @@
 import { Composer, session } from 'telegraf'
 import { getPhoneMessage, getPhonePleasureMessage, getStartMessage } from '../helpers.js'
 import { getMainKeyboard, getPhoneKeyboard } from '../keyboards.js'
-import db from '../config/firebase.js'
+import { db } from '../config/firebase.js'
 import { sendBotMessage } from '../barber.js'
 
 const composer = new Composer()
@@ -61,11 +61,19 @@ const getNewClientMessage = (ctx, phone_number) => {
 const writeNewUser = async (ctx) => {
     const userId = String(ctx.from.id)
     const { phone_number } = ctx.message.contact
+    const number = phone_number.slice(phone_number.length - 10)
+    const prefix = phone_number.substring(0, phone_number.length - 10)
 
     const res = await db
         .collection('barber-users')
         .doc(userId)
-        .set({ phone_number, ...ctx.from })
+        .set({
+            phone: {
+                number,
+                prefix,
+            },
+            ...ctx.from,
+        })
 
     if (res) {
         ctx.session.auth = true

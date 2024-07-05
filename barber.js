@@ -1,14 +1,16 @@
 import 'dotenv/config'
 import { Telegraf } from 'telegraf'
 import { getAddressKeyboard, getSheduleKeyboard } from './keyboards.js'
-import { CMD } from './const.js'
-import { getAddressMessage, getSheduleMessage } from './helpers.js'
+import { CMD, dateLocales } from './const.js'
+import { getAddressMessage, getNewEntryAdminMessage, getNewEntryUserMessage, getSheduleMessage } from './helpers.js'
 import StartComposer from './composers/start.composer.js'
 import BonusComposer from './composers/bonus.composer.js'
 import ContactComposer from './composers/contact.composer.js'
 import app from './config/express.js'
+import { db, Filter } from './config/firebase.js'
+import dayjs from 'dayjs'
 
-const { BOT_TOKEN } = process.env
+const { BOT_TOKEN, ADMIN_CHAT_ID } = process.env
 const bot = new Telegraf(BOT_TOKEN)
 
 // Авторизация, Получение контакта, Старт бота
@@ -41,6 +43,7 @@ bot.hears(CMD.SCHEDULE, (ctx) => {
 })
 
 export async function sendBotMessage(chatId, text) {
+    console.log(text)
     await bot.telegram.sendMessage(chatId, text, {
         parse_mode: 'HTML',
         link_preview_options: {
@@ -52,10 +55,90 @@ export async function sendBotMessage(chatId, text) {
 bot.launch()
 console.log('🤖 bot start')
 
-app.post('/hook', (req, res) => {
-    console.log(req.body) // Call your action on the request here
-    res.status(200).end() // Responding is important
+app.post('/hook', async (req, res) => {
+    console.log('new webhook =', req.body)
+    const { staff, client, status, date } = req.body.data
+
+    // Берем номер телефона пользователя (без +7)
+    const phoneNumber = client.phone.slice(client.phone.length - 10)
+    console.log('client phone =', phoneNumber)
+
+    // Ищем его в базе данных
+    const user = await getUserByClientPhone(phoneNumber)
+    if (user) {
+        switch (status) {
+            // Новая запись к мастеру
+            case 'create':
+                await noticeUserAndAdminAboutNewEntry(user, staff, date)
+                break
+            default:
+                const log = `Необрабатываемый статус вебхука: ${status}`
+                await sendBotMessage(ADMIN_CHAT_ID, log)
+                break
+        }
+    } else {
+        // Оповещаем, что пользователь не пользуется ботом
+        const log = `Пользователя с номером ${client.phone} нет в боте`
+        await sendBotMessage(ADMIN_CHAT_ID, log)
+    }
+
+    res.status(200).end()
 })
+
+const noticeUserAndAdminAboutNewEntry = async (user, staff, date) => {
+    const dayjsDate = dayjs(date)
+    const dateString = `на ${dayjsDate.date()} ${dateLocales[dayjsDate.month()]} ${dayjsDate.year()}, в ${dayjsDate.format('hh:mm')}`
+
+    await sendBotMessage(user.id, getNewEntryUserMessage(user, staff, dateString))
+    await sendBotMessage(ADMIN_CHAT_ID, getNewEntryAdminMessage(user, staff, dateString))
+}
+
+const getUserByClientPhone = async (phoneNumber) => {
+    try {
+        // Ищем пользователя по номеру телефона без префикса +7
+        const findUserRes = await db.collection('barber-users').where(Filter.where('phone.number', '==', phoneNumber))
+        const snapshot = await findUserRes.get()
+
+        if (snapshot.empty) {
+            const err = `Пользователь с номером ${phoneNumber} не найден`
+            await sendBotMessage(ADMIN_CHAT_ID, err)
+            return
+        }
+        if (snapshot.size > 1) {
+            const err = `Найдено несколько пользователей с одинаковым номером: ${phoneNumber}`
+            await sendBotMessage(ADMIN_CHAT_ID, err)
+            return
+        }
+
+        // Получаем данные пользователя
+        const user = snapshot.docs[0].data()
+        console.log('Найден пользователь', user)
+
+        const client = {
+            id: 227469234,
+            name: 'Артём',
+            surname: '',
+            patronymic: '',
+            display_name: 'Артём',
+            comment: '',
+            phone: '+79991800857',
+            card: '',
+            email: 'artemmishenko@mail.ru',
+            success_visits_count: 3,
+            fail_visits_count: 0,
+            discount: 0,
+            custom_fields: [],
+        }
+
+        // Обновляем информацию о клиенте из барбершопа
+        await db.collection('barber-users').doc(String(user.id)).set({ client }, { merge: true })
+
+        return user
+    } catch (e) {
+        await sendBotMessage(ADMIN_CHAT_ID, e)
+        return false
+    }
+}
 
 // Остановка бота
 process.once('SIGINT', () => bot.stop('SIGINT'))
