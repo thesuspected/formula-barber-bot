@@ -10,6 +10,7 @@ import BonusComposer from './composers/bonus.composer.js'
 import ContactComposer from './composers/contact.composer.js'
 import { db, Filter } from './config/firebase.js'
 import './utils/cron-ping.js'
+import dayjs from 'dayjs'
 
 const { BOT_TOKEN, ADMIN_CHAT_ID } = process.env
 const bot = new Telegraf(BOT_TOKEN)
