@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import dayjs from './config/dayjs.js'
+import './config/dayjs.js'
 import app from './config/express.js'
 import { Telegraf } from 'telegraf'
 import { getAddressKeyboard, getSheduleKeyboard } from './keyboards.js'
