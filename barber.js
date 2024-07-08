@@ -60,7 +60,7 @@ app.post('/hook', async (req, res) => {
     const { status, data } = req.body
     const { staff, client, date } = data
 
-    if (!client) {
+    if (!client || !client.phone) {
         return
     }
 
