@@ -1,4 +1,6 @@
 import 'dotenv/config'
+import './config/dayjs.js'
+import app from './config/express.js'
 import { Telegraf } from 'telegraf'
 import { getAddressKeyboard, getSheduleKeyboard } from './keyboards.js'
 import { CMD, dateLocales } from './const.js'
@@ -6,9 +8,7 @@ import { getAddressMessage, getNewEntryAdminMessage, getNewEntryUserMessage, get
 import StartComposer from './composers/start.composer.js'
 import BonusComposer from './composers/bonus.composer.js'
 import ContactComposer from './composers/contact.composer.js'
-import app from './config/express.js'
 import { db, Filter } from './config/firebase.js'
-import dayjs from 'dayjs'
 
 const { BOT_TOKEN, ADMIN_CHAT_ID } = process.env
 const bot = new Telegraf(BOT_TOKEN)
@@ -95,6 +95,7 @@ const noticeUserAndAdminAboutNewEntry = async (user, staff, date) => {
 }
 
 const getUserByClientPhone = async (phoneNumber, client) => {
+    console.log('getUserByClientPhone client =', client)
     try {
         // Ищем пользователя по номеру телефона без префикса +7
         const findUserRes = await db.collection('barber-users').where(Filter.where('phone.number', '==', phoneNumber))
