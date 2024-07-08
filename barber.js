@@ -9,6 +9,7 @@ import StartComposer from './composers/start.composer.js'
 import BonusComposer from './composers/bonus.composer.js'
 import ContactComposer from './composers/contact.composer.js'
 import { db, Filter } from './config/firebase.js'
+import './utils/cron-ping.js'
 
 const { BOT_TOKEN, ADMIN_CHAT_ID } = process.env
 const bot = new Telegraf(BOT_TOKEN)
@@ -53,7 +54,7 @@ export async function sendBotMessage(chatId, text) {
 }
 
 bot.launch()
-console.log('🤖 bot start')
+console.log('🤖 Bot running')
 
 app.post('/hook', async (req, res) => {
     console.log('new webhook =', req.body)
@@ -127,22 +128,6 @@ const getUserByClientPhone = async (phoneNumber, client) => {
         // Получаем данные пользователя
         const user = snapshot.docs[0].data()
         console.log('Найден пользователь', user)
-
-        const client = {
-            id: 227469234,
-            name: 'Артём',
-            surname: '',
-            patronymic: '',
-            display_name: 'Артём',
-            comment: '',
-            phone: '+79991800857',
-            card: '',
-            email: 'artemmishenko@mail.ru',
-            success_visits_count: 3,
-            fail_visits_count: 0,
-            discount: 0,
-            custom_fields: [],
-        }
 
         // Обновляем информацию о клиенте из барбершопа
         await db.collection('barber-users').doc(String(user.id)).set({ client }, { merge: true })
