@@ -78,7 +78,7 @@ app.post('/hook', async (req, res) => {
                 break
             default:
                 const log = `Необрабатываемый статус вебхука: ${status}`
-                await sendBotMessage(ADMIN_CHAT_ID, log)
+                console.log(log)
                 break
         }
     }
