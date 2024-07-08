@@ -58,8 +58,10 @@ console.log('🤖 bot start')
 app.post('/hook', async (req, res) => {
     console.log('new webhook =', req.body)
     const { status, data } = req.body
-    const { staff, client, date } = data
+    const { staff, client, date, id } = data
 
+    // TODO: Добавить проверку на существование record_id в barber-notices и обновление данных о записи (редактирование, удаление)
+    // resource: 'record',
     if (!client || !client.phone) {
         return
     }
@@ -75,6 +77,7 @@ app.post('/hook', async (req, res) => {
             // Новая запись к мастеру
             case 'create':
                 await noticeUserAndAdminAboutNewEntry(user, staff, date)
+                await addNewEntryToNoticesCron(id, user, staff, date)
                 break
             default:
                 const log = `Необрабатываемый статус вебхука: ${status}`
@@ -86,6 +89,15 @@ app.post('/hook', async (req, res) => {
     res.status(200).end()
 })
 
+const addNewEntryToNoticesCron = async (record_id, user, staff, date) => {
+    await db.collection('barber-notices').add({
+        date,
+        record_id,
+        user_id: user.id,
+        user_name: user.first_name,
+        staff_name: staff.name,
+    })
+}
 const noticeUserAndAdminAboutNewEntry = async (user, staff, date) => {
     const dayjsDate = dayjs(date)
     const dateString = `на ${dayjsDate.date()} ${dateLocales[dayjsDate.month()]} ${dayjsDate.year()}, в ${dayjsDate.format('hh:mm')}`

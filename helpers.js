@@ -53,6 +53,11 @@ export const getNewEntryUserMessage = (user, staff, date) => {
 Ты записан к мастеру <b>${staff.name}</b> ${date}
 Ждем тебя в Формуле! 🏎`
 }
+
+export const getEntryBeforeHourNotice = (user_name, staff_name, time) => {
+    return `${user_name}, спешим напомнить! 🏁
+Мастер <b>${staff_name}</b> ждет тебя сегодня к ${time} в Формуле! 🏎`
+}
 export const getNewEntryAdminMessage = (user, staff, date) => {
     return `<b>📆 Новая запись!</b>
 
