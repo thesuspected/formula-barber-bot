@@ -32,6 +32,7 @@ composer.use(async (ctx, next) => {
     if (!ctx.session) {
         ctx.session = {
             auth: false,
+            invited_from: undefined,
         }
     }
     if (!ctx.session.auth) {
@@ -39,12 +40,25 @@ composer.use(async (ctx, next) => {
         if (isUserExist) {
             ctx.session.auth = true
         } else {
-            await ctx.replyWithHTML(getPhoneMessage(ctx.from.first_name), getPhoneKeyboard())
+            ctx.session.invited_from = checkInvitedFromAccount(ctx)
+            await ctx.replyWithHTML(getPhoneMessage(ctx.from.first_name, ctx.session.invited_from), getPhoneKeyboard())
             return
         }
     }
     await next()
 })
+// Check invited from account
+const checkInvitedFromAccount = (ctx) => {
+    const message = ctx.message.text.split(' ')
+    const command = message[0]
+    const username = message[1]
+    // Если /start username
+    if (command === '/start' && username) {
+        console.log(`Пользователь ${ctx.from.username} приглашен в бота от ${username}`)
+        return username
+    }
+    return undefined
+}
 // Check User Auth
 const checkUserAuth = async (ctx) => {
     const userId = String(ctx.from.id)
@@ -52,11 +66,16 @@ const checkUserAuth = async (ctx) => {
     return !!user
 }
 const getNewClientMessage = (ctx, phone_number) => {
+    let invited_text = ''
+    if (ctx.session.invited_from) {
+        invited_text = `
+<b>Приглашен:</b> <a href="https://t.me/${ctx.session.invited_from}">${ctx.session.invited_from}</a>`
+    }
     return `<b>✅ Новый клиент!</b>
 
 <b>Аккаунт:</b> <a href="https://t.me/${ctx.from.username}">${ctx.from.username}</a>
 <b>Номер:</b> ${phone_number}
-<b>Имя Фамилия:</b> ${ctx.from.first_name ?? ''} ${ctx.from.last_name ?? ''}`
+<b>Имя:</b> ${ctx.from.first_name ?? ''} ${ctx.from.last_name ?? ''}${invited_text}`
 }
 const writeNewUser = async (ctx) => {
     const userId = String(ctx.from.id)
@@ -73,6 +92,8 @@ const writeNewUser = async (ctx) => {
                 prefix,
             },
             ...ctx.from,
+            invited_from: ctx.session.invited_from ?? null,
+            bonus_balance: ctx.session.invited_from ? 200 : 0,
         })
 
     if (res) {
@@ -84,6 +105,10 @@ const writeNewUser = async (ctx) => {
 
 // start
 composer.start(async (ctx) => {
+    if (ctx.payload) {
+        // TODO: Добавить проверку на привязку к аккаунту пригласившему этот
+        console.log(`Приглашен в бота от ${ctx.payload}`)
+    }
     ctx.replyWithHTML(getStartMessage(ctx.from.first_name), {
         link_preview_options: {
             is_disabled: true,

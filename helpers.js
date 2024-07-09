@@ -7,9 +7,14 @@ export const getStartMessage = (name) => {
 Приглашай друзей и получай бонусные рубли 🎁`
 }
 
-export const getPhoneMessage = (name) => {
+export const getPhoneMessage = (name, invited_from) => {
+    let invited_text = ''
+    if (invited_from) {
+        invited_text = `<blockquote>Ты был приглашен @${invited_from} 🤝
+И получаешь 200 бонусов на счет! 🎁</blockquote>`
+    }
     return `${name}, приветствуем тебя в Формуле! 👋
-Для корректной работы бота поделись с нами контактом ⬇️`
+Для корректной работы бота поделись с нами контактом ⬇️ ${invited_text}`
 }
 
 export const getPhonePleasureMessage = () => {
@@ -63,7 +68,7 @@ export const getNewEntryAdminMessage = (user, staff, date) => {
 
 <b>Аккаунт:</b> <a href="https://t.me/${user.username}">${user.username}</a>
 <b>Номер:</b> ${user.phone.prefix}${user.phone.number}
-<b>Имя Фамилия:</b> ${user.first_name ?? ''} ${user.last_name ?? ''}
+<b>Имя:</b> ${user.first_name ?? ''} ${user.last_name ?? ''}
 <b>Запись:</b> ${date}
 <b>Мастер:</b> ${staff.name}`
 }
