@@ -2,7 +2,7 @@ import cron from 'node-cron'
 import { db } from '../config/firebase.js'
 import { sendBotMessage } from '../barber.js'
 import { getEntryBeforeHourNotice } from '../helpers.js'
-import dayjs from '../config/dayjs.js'
+import dayjs from 'dayjs'
 
 console.log(`🔔 Cron running (every 10 minutes)`)
 
@@ -29,12 +29,12 @@ const launchNoticeCron = async () => {
     // TODO: Удалять пропущенные уведомления (которые меньше текущей даты)
 
     // Проходимся по уведомлениям
-    const currentDatetime = dayjs().tz()
+    const currentDatetime = dayjs().tz('Europe/Saratov')
     todayNotices.forEach((notice) => {
         const { user_id, user_name, staff_name, date } = notice
 
         // Вычисляем разницу в часах
-        const noticeDatetime = dayjs(date)
+        const noticeDatetime = dayjs(date).tz('Europe/Moscow')
         const hoursDiff = noticeDatetime.diff(currentDatetime, 'hour', true).toFixed(2)
         console.log(`notice dt = ${noticeDatetime}, current dt = ${currentDatetime}`)
         console.log(`${hoursDiff} часа до записи.`)
