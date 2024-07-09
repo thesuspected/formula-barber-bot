@@ -36,10 +36,11 @@ const launchNoticeCron = async () => {
         // Вычисляем разницу в часах
         const noticeDatetime = dayjs(date)
         const hoursDiff = noticeDatetime.diff(currentDatetime, 'hour', true).toFixed(2)
+        console.log(`notice dt = ${noticeDatetime}, current dt = ${currentDatetime}`)
         console.log(`${hoursDiff} часа до записи.`)
 
-        // Если меньше 1.5 часов до записи, отправялем уведомление
-        if (hoursDiff < 1.5) {
+        // Если меньше N часов до записи, отправялем уведомление
+        if (hoursDiff < 1.6) {
             const timeString = noticeDatetime.format('HH:mm')
             console.log(`Отправляем уведомление для ${user_name} на ${timeString}`)
             sendBotMessage(user_id, getEntryBeforeHourNotice(user_name, staff_name, timeString))
