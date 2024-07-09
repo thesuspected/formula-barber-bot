@@ -102,7 +102,7 @@ const addNewEntryToNoticesCron = async (record_id, user, staff, date) => {
 }
 const noticeUserAndAdminAboutNewEntry = async (user, staff, date) => {
     const dayjsDate = dayjs(date)
-    const dateString = `на ${dayjsDate.date()} ${dateLocales[dayjsDate.month()]} ${dayjsDate.year()}, в ${dayjsDate.format('hh:mm')}`
+    const dateString = `на ${dayjsDate.date()} ${dateLocales[dayjsDate.month()]} ${dayjsDate.year()}, в ${dayjsDate.format('HH:mm')}`
 
     await sendBotMessage(user.id, getNewEntryUserMessage(user, staff, dateString))
     await sendBotMessage(ADMIN_CHAT_ID, getNewEntryAdminMessage(user, staff, dateString))
