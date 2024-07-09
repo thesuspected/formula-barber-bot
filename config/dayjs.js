@@ -10,7 +10,7 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.tz.setDefault('Europe/Saratov')
 
-console.log('tz', dayjs().tz('Europe/Saratov').format('DD MMMM YYYY, HH:mm'))
+console.log('tz', dayjs().tz().format('DD MMMM YYYY, HH:mm'))
 console.log('🕗', dayjs().format('DD MMMM YYYY, HH:mm'))
 
 export default dayjs
