@@ -29,12 +29,12 @@ const launchNoticeCron = async () => {
     // TODO: Удалять пропущенные уведомления (которые меньше текущей даты)
 
     // Проходимся по уведомлениям
-    const currentDatetime = dayjs().tz('Europe/Saratov')
+    const currentDatetime = dayjs()
     todayNotices.forEach((notice) => {
         const { user_id, user_name, staff_name, date } = notice
 
         // Вычисляем разницу в часах
-        const noticeDatetime = dayjs(date).tz('Europe/Moscow')
+        const noticeDatetime = dayjs(date)
         const hoursDiff = noticeDatetime.diff(currentDatetime, 'hour', true).toFixed(2)
         console.log(`notice dt = ${noticeDatetime}, current dt = ${currentDatetime}`)
         console.log(`${hoursDiff} часа до записи.`)
@@ -53,6 +53,6 @@ const launchNoticeCron = async () => {
 }
 
 cron.schedule('* * * * *', async () => {
-    console.log('Крон событие уведомления', dayjs().tz().format('DD MMMM YYYY, HH:mm'))
+    console.log('Крон событие уведомления', dayjs().format('DD MMMM YYYY, HH:mm'))
     await launchNoticeCron()
 })
