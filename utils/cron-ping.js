@@ -37,7 +37,6 @@ const launchNoticeCron = async () => {
         // Вычисляем разницу в часах
         const noticeDatetime = dayjs(date)
         const hoursDiff = noticeDatetime.diff(currentDatetime, 'hour', true).toFixed(2)
-        console.log(`notice dt = ${noticeDatetime}, current dt = ${currentDatetime}`)
         console.log(`${hoursDiff} часа до записи.`)
 
         // Если меньше N часов до записи, отправялем уведомление
