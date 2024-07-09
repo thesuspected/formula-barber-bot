@@ -4,7 +4,8 @@ import { sendBotMessage } from '../barber.js'
 import { getEntryBeforeHourNotice } from '../helpers.js'
 import dayjs from 'dayjs'
 
-console.log(`🔔 Cron running (every 10 minutes)`)
+const CRON_INTERVAL = 15 // Интервал в минутах
+console.log(`🔔 Cron running (every ${CRON_INTERVAL} minutes)`)
 
 const launchNoticeCron = async () => {
     // Получаем записи из БД
@@ -52,7 +53,7 @@ const launchNoticeCron = async () => {
     })
 }
 
-cron.schedule('* * * * *', async () => {
+cron.schedule(`*/${CRON_INTERVAL} * * * *`, async () => {
     console.log('Крон событие уведомления', dayjs().format('DD MMMM YYYY, HH:mm'))
     await launchNoticeCron()
 })
