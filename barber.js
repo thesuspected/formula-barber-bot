@@ -118,7 +118,7 @@ const getUserByClientPhone = async (phoneNumber, client) => {
         if (snapshot.empty) {
             // Оповещаем, что пользователь не пользуется ботом
             const err = `Пользователь ${client.name} с номером ${client.phone} не найден в боте`
-            await sendBotMessage(ADMIN_CHAT_ID, err)
+            console.log(err)
             return
         }
         if (snapshot.size > 1) {
