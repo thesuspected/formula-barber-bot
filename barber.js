@@ -43,7 +43,6 @@ bot.hears(CMD.SCHEDULE, (ctx) => {
 })
 
 export async function sendBotMessage(chatId, text) {
-    console.log(text)
     await bot.telegram.sendMessage(chatId, text, {
         parse_mode: 'HTML',
         link_preview_options: {

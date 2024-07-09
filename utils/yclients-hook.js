@@ -73,6 +73,7 @@ const getUserByClientPhone = async (phoneNumber, client) => {
         }
         if (snapshot.size > 1) {
             const err = `Найдено несколько пользователей с одинаковым номером: ${phoneNumber}`
+            console.log(err)
             await sendBotMessage(ADMIN_CHAT_ID, err)
             return
         }
@@ -86,6 +87,7 @@ const getUserByClientPhone = async (phoneNumber, client) => {
 
         return user
     } catch (e) {
+        console.error(e)
         await sendBotMessage(ADMIN_CHAT_ID, e)
         return false
     }

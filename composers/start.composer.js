@@ -99,6 +99,7 @@ const writeNewUser = async (ctx) => {
     if (res) {
         ctx.session.auth = true
         const log = getNewClientMessage(ctx, phone_number)
+        console.log(log)
         await sendBotMessage(ADMIN_CHAT_ID, log)
     }
 }

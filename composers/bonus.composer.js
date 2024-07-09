@@ -1,7 +1,14 @@
 import { Composer } from 'telegraf'
 import { CMD } from '../const.js'
 import { getBackKeyboard } from '../keyboards.js'
-import { getBonusMessage, getBonusKeyboard, BONUS_TEXT, BONUS, getReviewsKeyboard } from './bonus.const.js'
+import {
+    getBonusMessage,
+    getBonusKeyboard,
+    BONUS_TEXT,
+    BONUS,
+    getReviewsKeyboard,
+    getInviteFriendMessage,
+} from './bonus.const.js'
 import { db } from '../config/firebase.js'
 
 const composer = new Composer()
@@ -14,14 +21,14 @@ const getBonusCommand = async (ctx) => {
 composer.hears(CMD.BONUS, async (ctx) => ctx.replyWithHTML(await getBonusCommand(ctx), getBonusKeyboard()))
 
 composer.action(BONUS.INVITE_FRIEND, (ctx) =>
-    ctx.editMessageText(BONUS_TEXT.INVITE_FRIEND, {
+    ctx.editMessageText(getInviteFriendMessage(ctx), {
         parse_mode: 'HTML',
         ...getBackKeyboard(BONUS.BACK, BONUS.BACK),
     })
 )
 composer.action(BONUS.INVITE_FRIEND_FROM_SHEDULE, (ctx) => {
     ctx.answerCbQuery()
-    ctx.replyWithHTML(BONUS_TEXT.INVITE_FRIEND, {
+    ctx.replyWithHTML(getInviteFriendMessage(ctx), {
         parse_mode: 'HTML',
         ...getBackKeyboard(BONUS.BACK, BONUS.BACK),
     })
@@ -54,8 +61,8 @@ composer.action(BONUS.BONUS_REFERENCES, (ctx) =>
         ...getBackKeyboard(BONUS.BACK, BONUS.BACK),
     })
 )
-composer.action(BONUS.BACK, (ctx) =>
-    ctx.editMessageText(getBonusMessage(), {
+composer.action(BONUS.BACK, async (ctx) =>
+    ctx.editMessageText(await getBonusCommand(ctx), {
         parse_mode: 'HTML',
         ...getBonusKeyboard(),
     })
