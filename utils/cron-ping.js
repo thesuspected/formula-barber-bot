@@ -29,7 +29,7 @@ const launchNoticeCron = async () => {
     // TODO: Удалять пропущенные уведомления (которые меньше текущей даты)
 
     // Проходимся по уведомлениям
-    const currentDatetime = dayjs()
+    const currentDatetime = dayjs().tz()
     todayNotices.forEach((notice) => {
         const { user_id, user_name, staff_name, date } = notice
 
@@ -52,6 +52,6 @@ const launchNoticeCron = async () => {
 }
 
 cron.schedule('*/10 * * * *', async () => {
-    console.log('Крон событие уведомления', dayjs().format('DD MMMM YYYY, HH:mm'))
+    console.log('Крон событие уведомления', dayjs().tz().format('DD MMMM YYYY, HH:mm'))
     await launchNoticeCron()
 })
