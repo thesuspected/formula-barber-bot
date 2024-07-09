@@ -2,7 +2,7 @@ import cron from 'node-cron'
 import { db } from '../config/firebase.js'
 import { sendBotMessage } from '../barber.js'
 import { getEntryBeforeHourNotice } from '../helpers.js'
-import dayjs from 'dayjs'
+import dayjs from '../config/dayjs.js'
 
 console.log(`🔔 Cron running (every 10 minutes)`)
 
@@ -52,7 +52,7 @@ const launchNoticeCron = async () => {
     })
 }
 
-cron.schedule('*/10 * * * *', async () => {
+cron.schedule('* * * * *', async () => {
     console.log('Крон событие уведомления', dayjs().tz().format('DD MMMM YYYY, HH:mm'))
     await launchNoticeCron()
 })
