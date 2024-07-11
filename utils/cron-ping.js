@@ -4,6 +4,7 @@ import { sendBotMessage } from '../barber.js'
 import { getEntryBeforeHourNotice } from '../helpers.js'
 import dayjs from 'dayjs'
 
+const { ADMIN_CHAT_ID } = process.env
 const CRON_INTERVAL = 15 // Интервал в минутах
 console.log(`🔔 Cron running (every ${CRON_INTERVAL} minutes)`)
 
@@ -42,8 +43,10 @@ const launchNoticeCron = async () => {
         // Если меньше N часов до записи, отправялем уведомление
         if (hoursDiff < 1.6) {
             const timeString = noticeDatetime.format('HH:mm')
-            console.log(`Отправляем уведомление для ${user_name} на ${timeString}`)
+            const noticeLog = `Отправил напоминание о записи для <b>${user_name}</b> на <b>${timeString}</b>`
+            console.log(noticeLog)
             sendBotMessage(user_id, getEntryBeforeHourNotice(user_name, staff_name, timeString))
+            sendBotMessage(ADMIN_CHAT_ID, noticeLog)
             // Удаляем отправленное уведомление из бд
             noticesCollection.doc(notice.id).delete()
         } else {

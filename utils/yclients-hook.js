@@ -5,9 +5,13 @@ import { dateLocales } from '../const.js'
 import { getNewEntryAdminMessage, getNewEntryUserMessage } from '../helpers.js'
 import { sendBotMessage } from '../barber.js'
 
-const { ADMIN_CHAT_ID } = process.env
+const { ADMIN_CHAT_ID, DEBUG_CHAT_ID } = process.env
 app.post('/hook', async (req, res) => {
-    console.log('new webhook =', req.body)
+    const bodyLog = `----- Вебхук ${dayjs().format('DD MMMM YYYY, HH:mm')} -----
+<pre><code class="language-javascript">${req.body}</code></pre>`
+    console.log(bodyLog)
+    await sendBotMessage(DEBUG_CHAT_ID, bodyLog)
+
     const { status, data } = req.body
     const { staff, client, date, id } = data
 
