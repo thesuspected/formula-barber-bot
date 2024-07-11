@@ -7,9 +7,8 @@ import { sendBotMessage } from '../barber.js'
 
 const { ADMIN_CHAT_ID, DEBUG_CHAT_ID } = process.env
 app.post('/hook', async (req, res) => {
-    const bodyLog = `----- Вебхук ${dayjs().format('DD MMMM YYYY, HH:mm')} -----
-<pre><code class="language-javascript">${JSON.parse(req.body)}</code></pre>`
-    console.log(bodyLog)
+    const bodyLog = `----- Вебхук ${dayjs().format('DD MMMM YYYY, HH:mm')} -----\n`
+    console.log(bodyLog, req.body)
     await sendBotMessage(DEBUG_CHAT_ID, bodyLog)
 
     const { status, data } = req.body
