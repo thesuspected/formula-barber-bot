@@ -9,7 +9,10 @@ const { ADMIN_CHAT_ID, DEBUG_CHAT_ID } = process.env
 app.post('/hook', async (req, res) => {
     const bodyLog = `----- Вебхук ${dayjs().format('DD MMMM YYYY, HH:mm')} -----\n`
     console.log(bodyLog, req.body)
-    await sendBotMessage(DEBUG_CHAT_ID, bodyLog)
+    await sendBotMessage(
+        DEBUG_CHAT_ID,
+        bodyLog + `<pre><code class="language-javascript">${JSON.stringify(req.body)}</code></pre>`
+    )
 
     const { status, data } = req.body
     const { staff, client, date, id } = data
