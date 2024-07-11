@@ -11,7 +11,7 @@ app.post('/hook', async (req, res) => {
     console.log(bodyLog, req.body)
     await sendBotMessage(
         DEBUG_CHAT_ID,
-        bodyLog + `<pre><code class="language-javascript">${JSON.stringify(req.body)}</code></pre>`
+        bodyLog + `<pre><code class="language-javascript">${JSON.stringify(req.body, null, 2)}</code></pre>`
     )
 
     const { status, data } = req.body
