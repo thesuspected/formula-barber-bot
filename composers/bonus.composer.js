@@ -26,7 +26,7 @@ composer.action(BONUS.INVITE_FRIEND, (ctx) =>
         ...getBackKeyboard(BONUS.BACK, BONUS.BACK),
     })
 )
-composer.action(BONUS.INVITE_FRIEND_FROM_SHEDULE, (ctx) => {
+composer.action(BONUS.INVITE_FRIEND_FROM_SCHEDULE, (ctx) => {
     ctx.answerCbQuery()
     ctx.replyWithHTML(getInviteFriendMessage(ctx), {
         parse_mode: 'HTML',
@@ -39,7 +39,7 @@ composer.action(BONUS.PAIR_HAIR, (ctx) =>
         ...getBackKeyboard(BONUS.BACK, BONUS.BACK),
     })
 )
-composer.action(BONUS.PAIR_HAIR_FROM_SHEDULE, (ctx) => {
+composer.action(BONUS.PAIR_HAIR_FROM_SCHEDULE, (ctx) => {
     ctx.answerCbQuery()
     ctx.replyWithHTML(BONUS_TEXT.PAIR_HAIR, {
         parse_mode: 'HTML',

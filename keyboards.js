@@ -30,7 +30,7 @@ export const getAddressKeyboard = () => {
 
 export const getSheduleKeyboard = () => {
     return Markup.inlineKeyboard([
-        Markup.button.callback(BONUS.INVITE_FRIEND, BONUS.INVITE_FRIEND_FROM_SHEDULE),
-        Markup.button.callback(BONUS.PAIR_HAIR, BONUS.PAIR_HAIR_FROM_SHEDULE),
+        Markup.button.callback(BONUS.INVITE_FRIEND, BONUS.INVITE_FRIEND_FROM_SCHEDULE),
+        Markup.button.callback(BONUS.PAIR_HAIR, BONUS.PAIR_HAIR_FROM_SCHEDULE),
     ]).resize()
 }

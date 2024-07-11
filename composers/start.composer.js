@@ -11,7 +11,8 @@ const { ADMIN_CHAT_ID } = process.env
 composer.use(session())
 // Logger Middleware
 composer.use(async (ctx, next) => {
-    const log = `<a href="https://t.me/${ctx.from.username}">${ctx.from.username}</a>: ${ctx.message ? ctx.message.text ?? '-' : ctx}`
+    const text = ctx.message ? ctx.message.text : ctx.update.callback_query.data
+    const log = `<a href="https://t.me/${ctx.from.username}">${ctx.from.username}</a>: ${text}`
     console.log(log, `(chat_id: ${ctx.chat.id})`)
     await sendBotMessage(ADMIN_CHAT_ID, log)
     // console.log(ctx) // uncomment for log ctx

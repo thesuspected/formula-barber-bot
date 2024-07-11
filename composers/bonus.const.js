@@ -7,8 +7,8 @@ export const BONUS = {
     BONUS_REVIEWS: '💰 Бонусы за отзывы',
     BONUS_REFERENCES: '📸 Бонусы за упоминания',
     BACK: '⬅️ Назад к акциям',
-    INVITE_FRIEND_FROM_SHEDULE: 'INVITE_FRIEND_FROM_SHEDULE',
-    PAIR_HAIR_FROM_SHEDULE: 'INVITE_FRIEND_FROM_SHEDULE',
+    INVITE_FRIEND_FROM_SCHEDULE: '🤝🏻 Пригласи друга 📅',
+    PAIR_HAIR_FROM_SCHEDULE: '💇🏼💇🏽 Парная стрижка 📅',
 }
 export const BONUS_TEXT = {
     PAIR_HAIR: `<u><b>${BONUS.PAIR_HAIR}</b></u>
