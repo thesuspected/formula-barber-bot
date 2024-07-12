@@ -112,8 +112,9 @@ export const deleteNoticeByRecordId = async (record_id) => {
     const doc = await noticeRef.get()
     if (!doc.exists) {
         console.log(`Записи №${record_id} для удаления не найдено`)
-        return
+        return false
     }
     await noticeRef.delete()
     console.log(`Уведомление о записи №${record_id} удалено`)
+    return true
 }

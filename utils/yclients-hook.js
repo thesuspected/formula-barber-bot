@@ -48,8 +48,10 @@ app.post('/hook', async (req, res) => {
                 break
             // Удаление записи
             case 'delete':
-                await deleteNoticeByRecordId(id)
-                await noticeAboutDeleteEntry(user, staff, date)
+                const isDeleted = await deleteNoticeByRecordId(id)
+                if (isDeleted) {
+                    await noticeAboutDeleteEntry(user, staff, date)
+                }
                 break
             default:
                 const log = `Необрабатываемый статус вебхука: ${status}`
