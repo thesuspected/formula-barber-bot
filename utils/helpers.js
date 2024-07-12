@@ -37,7 +37,7 @@ export const noticeAboutUpdateEntry = async (user, staff, date, oldDate) => {
 }
 
 export const addNewEntryToNoticesCron = async (record_id, user, staff, date) => {
-    await db.collection('barber-notices').doc(record_id).set({
+    await db.collection('barber-notices').doc(String(record_id)).set({
         date,
         record_id,
         user_id: user.id,
@@ -82,7 +82,7 @@ export const getUserByClientPhone = async (phoneNumber, client) => {
 }
 
 export const updateNoticeByRecordId = async (record_id, date) => {
-    const noticeRef = db.collection('barber-notices').doc(record_id)
+    const noticeRef = db.collection('barber-notices').doc(String(record_id))
     const doc = await noticeRef.get()
     if (!doc.exists) {
         console.log(`Записи №${record_id} для изменения не найдено`)
@@ -100,7 +100,7 @@ export const updateNoticeByRecordId = async (record_id, date) => {
 }
 
 export const deleteNoticeByRecordId = async (record_id) => {
-    const noticeRef = db.collection('barber-notices').doc(record_id)
+    const noticeRef = db.collection('barber-notices').doc(String(record_id))
     const doc = await noticeRef.get()
     if (!doc.exists) {
         console.log(`Записи №${record_id} для удаления не найдено`)
