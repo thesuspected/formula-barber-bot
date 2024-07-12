@@ -4,6 +4,7 @@ import {
     addNewEntryToNoticesCron,
     deleteNoticeByRecordId,
     getUserByClientPhone,
+    noticeAboutDeleteEntry,
     noticeAboutNewEntry,
     noticeAboutUpdateEntry,
     sendDebugMessage,
@@ -48,6 +49,7 @@ app.post('/hook', async (req, res) => {
             // Удаление записи
             case 'delete':
                 await deleteNoticeByRecordId(id)
+                await noticeAboutDeleteEntry(user, staff, date)
                 break
             default:
                 const log = `Необрабатываемый статус вебхука: ${status}`

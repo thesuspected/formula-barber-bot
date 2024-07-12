@@ -2,6 +2,8 @@ import dayjs from 'dayjs'
 import { dateLocales } from '../const.js'
 import { sendBotMessage } from '../barber.js'
 import {
+    getDeleteEntryAdminMessage,
+    getDeleteEntryUserMessage,
     getNewEntryAdminMessage,
     getNewEntryUserMessage,
     getUpdateEntryAdminMessage,
@@ -34,6 +36,12 @@ export const noticeAboutUpdateEntry = async (user, staff, date, oldDate) => {
     const oldDateString = getDateString(oldDate)
     await sendBotMessage(user.id, getUpdateEntryUserMessage(user, staff, dateString))
     await sendBotMessage(ADMIN_CHAT_ID, getUpdateEntryAdminMessage(user, staff, dateString, oldDateString))
+}
+
+export const noticeAboutDeleteEntry = async (user, staff, date) => {
+    const dateString = getDateString(date)
+    await sendBotMessage(user.id, getDeleteEntryUserMessage(user, staff, dateString))
+    await sendBotMessage(ADMIN_CHAT_ID, getDeleteEntryAdminMessage(user, staff, dateString))
 }
 
 export const addNewEntryToNoticesCron = async (record_id, user, staff, date) => {
