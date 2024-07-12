@@ -14,7 +14,7 @@ import {
 app.post('/hook', async (req, res) => {
     const bodyLog = `----- Вебхук ${dayjs().format('DD MMMM YYYY, HH:mm')} -----\n`
     console.log(bodyLog, req.body)
-    await sendDebugMessage()
+    await sendDebugMessage(bodyLog, req.body)
 
     const { status, resource, data } = req.body
     const { staff, client, date, id } = data
