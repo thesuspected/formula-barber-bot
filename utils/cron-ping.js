@@ -1,7 +1,7 @@
 import cron from 'node-cron'
 import { db } from '../config/firebase.js'
 import { sendBotMessage } from '../barber.js'
-import { getEntryBeforeHourNotice } from '../helpers.js'
+import { getEntryBeforeHourNotice } from './messages.js'
 import dayjs from 'dayjs'
 
 const { ADMIN_CHAT_ID } = process.env
