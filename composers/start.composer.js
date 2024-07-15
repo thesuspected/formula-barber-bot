@@ -1,7 +1,7 @@
 import { Composer, session } from 'telegraf'
 import { getPhoneMessage, getPhonePleasureMessage, getStartMessage } from '../helpers.js'
 import { getMainKeyboard, getPhoneKeyboard } from '../keyboards.js'
-import { db } from '../config/firebase.js'
+import { db, Filter } from '../config/firebase.js'
 import { sendBotMessage } from '../barber.js'
 
 const composer = new Composer()
@@ -11,7 +11,16 @@ const { ADMIN_CHAT_ID } = process.env
 composer.use(session())
 // Logger Middleware
 composer.use(async (ctx, next) => {
-    const text = ctx.message ? ctx.message.text : ctx.update.callback_query.data
+    let text = 'Неизвестная команда'
+    if (ctx.message?.text) {
+        text = ctx.message.text
+    }
+    if (ctx.message?.contact) {
+        text = `📢 Поделиться контактом ${ctx.message.contact.phone_number}`
+    }
+    if (ctx.update?.callback_query) {
+        text = ctx.update.callback_query.data
+    }
     const log = `<a href="https://t.me/${ctx.from.username}">${ctx.from.username}</a>: ${text}`
     console.log(log, `(chat_id: ${ctx.chat.id})`)
     await sendBotMessage(ADMIN_CHAT_ID, log)
@@ -78,24 +87,72 @@ const getNewClientMessage = (ctx, phone_number) => {
 <b>Номер:</b> ${phone_number}
 <b>Имя:</b> ${ctx.from.first_name ?? ''} ${ctx.from.last_name ?? ''}${invited_text}`
 }
+const pushUserToInvitedArray = async (user_id, username, invited_from) => {
+    try {
+        // Ищем пользователя по username (полученное из invited_from)
+        const findUserRes = await db.collection('barber-users').where(Filter.where('username', '==', invited_from))
+        const snapshot = await findUserRes.get()
+
+        if (snapshot.empty) {
+            // Оповещаем, что пользователь не найден
+            const err = `Пользователь с никнеймом ${invited_from} не найден в боте`
+            console.log(err)
+            return
+        }
+        if (snapshot.size > 1) {
+            const err = `Найдено несколько пользователей с одинаковым никнеймом: ${invited_from}`
+            console.log(err)
+            await sendBotMessage(ADMIN_CHAT_ID, err)
+            return
+        }
+
+        // Получаем данные пользователя
+        const user = snapshot.docs[0].data()
+        console.log('Найден пользователь', user)
+
+        // Добавляем в массив приглашенных
+        let invited = user.invited
+        const findUser = invited.find((invited_user) => invited_user.user_id === user_id)
+        if (findUser) {
+            console.log(`Пользователь ${username} уже в списке приглашенных у ${user.username}`)
+        } else {
+            invited.push({
+                user_id,
+                username,
+                used_services: false,
+            })
+        }
+        await db.collection('barber-users').doc(String(user.id)).update({ invited })
+    } catch (e) {
+        console.error(e)
+        await sendBotMessage(ADMIN_CHAT_ID, e)
+        return false
+    }
+}
+
 const writeNewUser = async (ctx) => {
     const userId = String(ctx.from.id)
     const { phone_number } = ctx.message.contact
     const number = phone_number.slice(phone_number.length - 10)
     const prefix = phone_number.substring(0, phone_number.length - 10)
 
-    const res = await db
-        .collection('barber-users')
-        .doc(userId)
-        .set({
-            phone: {
-                number,
-                prefix,
-            },
-            ...ctx.from,
-            invited_from: ctx.session.invited_from ?? null,
-            bonus_balance: ctx.session.invited_from ? 200 : 0,
-        })
+    const userRef = db.collection('barber-users').doc(userId)
+    const res = await userRef.set({
+        phone: {
+            number,
+            prefix,
+        },
+        ...ctx.from,
+        invited: [], // Список приглашенных
+        invited_from: ctx.session.invited_from ?? null,
+        bonus_balance: ctx.session.invited_from ? 200 : 0,
+        used_services: false, // Оплачивал ли услуги в барбершопе
+    })
+
+    // Если приглашен кем-то, добавляем инфу об этом
+    if (ctx.session.invited_from) {
+        await pushUserToInvitedArray(userId, ctx.from.username, ctx.session.invited_from)
+    }
 
     if (res) {
         ctx.session.auth = true
@@ -109,7 +166,7 @@ const writeNewUser = async (ctx) => {
 composer.start(async (ctx) => {
     if (ctx.payload) {
         // TODO: Добавить проверку на привязку к аккаунту пригласившему этот
-        console.log(`Приглашен в бота от ${ctx.payload}`)
+        console.log(`${ctx.from.username} перешел по приглашению от ${ctx.payload}`)
     }
     ctx.replyWithHTML(getStartMessage(ctx.from.first_name), {
         link_preview_options: {
