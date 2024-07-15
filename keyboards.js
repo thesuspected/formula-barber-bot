@@ -3,10 +3,7 @@ import { Markup } from 'telegraf'
 import { BONUS } from './composers/bonus.const.js'
 
 export const getMainKeyboard = () => {
-    return Markup.keyboard([
-        [CMD.ADDRESS, CMD.SCHEDULE],
-        [CMD.CONTACT, CMD.BONUS],
-    ]).resize()
+    return Markup.keyboard([[CMD.ADDRESS, CMD.SCHEDULE], [CMD.CONTACT, CMD.BONUS], [CMD.BALANCE]]).resize()
 }
 
 export const getPhoneKeyboard = () => {

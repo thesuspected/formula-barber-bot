@@ -6,6 +6,7 @@ import { CMD } from './const.js'
 import { getAddressMessage, getSheduleMessage } from './helpers.js'
 import StartComposer from './composers/start.composer.js'
 import BonusComposer from './composers/bonus.composer.js'
+import BalanceComposer from './composers/balance.composer.js'
 import ContactComposer from './composers/contact.composer.js'
 import './utils/cron-ping.js'
 import './utils/yclients-hook.js'
@@ -15,8 +16,10 @@ const bot = new Telegraf(BOT_TOKEN)
 
 // Авторизация, Получение контакта, Старт бота
 bot.use(StartComposer)
-// 🎁 Предложения и бонусы
+// 🎁 Предложения
 bot.use(BonusComposer)
+// 💸 Бонусный баланс
+bot.use(BalanceComposer)
 // 👥 Контакты
 bot.use(ContactComposer)
 // 📍 Наш адрес

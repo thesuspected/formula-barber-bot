@@ -2,7 +2,8 @@ export const CMD = {
     ADDRESS: '📍 Наш адрес',
     SCHEDULE: '📅 График работы',
     CONTACT: '👥 Контакты',
-    BONUS: '🎁 Предложения и бонусы',
+    BONUS: '🎁 Предложения',
+    BALANCE: '💸 Бонусный баланс',
 }
 
 export const BACK_BUTTON = '⬅️ Назад'

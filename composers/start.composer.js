@@ -43,6 +43,8 @@ composer.use(async (ctx, next) => {
         ctx.session = {
             auth: false,
             invited_from: undefined,
+            last_balance: undefined,
+            last_invited: undefined,
         }
     }
     if (!ctx.session.auth) {
