@@ -2,12 +2,15 @@ import app from '../config/express.js'
 import dayjs from 'dayjs'
 import {
     addNewEntryToNoticesCron,
+    bonusRewardForReferral,
     deleteNoticeByRecordId,
     getUserByClientPhone,
     noticeAboutDeleteEntry,
     noticeAboutNewEntry,
+    noticeAboutRewardForReferral,
     noticeAboutUpdateEntry,
     sendDebugMessage,
+    setUserUsedServices,
     updateNoticeByRecordId,
 } from './helpers.js'
 
@@ -31,6 +34,8 @@ app.post('/hook', async (req, res) => {
 
     // Ищем его в базе данных
     const user = await getUserByClientPhone(phoneNumber, client)
+
+    // Обработка записей
     if (user && resource === 'record') {
         switch (status) {
             // Новая запись к мастеру
@@ -54,7 +59,30 @@ app.post('/hook', async (req, res) => {
                 }
                 break
             default:
-                const log = `Необрабатываемый статус вебхука: ${status}`
+                const log = `Необрабатываемый вебхук, ресурс: ${resource}, статус : ${status}`
+                console.log(log)
+                break
+        }
+    }
+
+    // Обработка финансовых операций
+    if (user && resource === 'finances_operation') {
+        switch (status) {
+            // Фин. операция для первого посещения
+            case 'create':
+                // Если кем-то приглашен и еще не посещал барбершоп
+                if (user.invited_from && !user.used_services) {
+                    // Помечаем рефералу, что он пользовался услугами (used_services = true)
+                    await setUserUsedServices(user.id)
+                    // Начисляем бонусы юзеру за реферала и помечаем (used_services = true)
+                    const rewardInfo = await bonusRewardForReferral(user.invited_from, user)
+                    // Оповещаем юзера и админов о награждении за реферала
+                    await noticeAboutRewardForReferral(rewardInfo, user)
+                }
+                // TODO: Добавить здесь логику опроса после посещения барбершопа
+                break
+            default:
+                const log = `Необрабатываемый вебхук, ресурс: ${resource}, статус : ${status}`
                 console.log(log)
                 break
         }

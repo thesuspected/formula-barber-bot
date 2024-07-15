@@ -13,7 +13,7 @@ const getUserData = async (ctx) => {
 }
 
 const getBalanceMessage = (user) => {
-    return `<u><b>${CMD.BALANCE}</b></u>: ${user.bonus_balance} ₽
+    return `<u><b>${CMD.BALANCE}</b></u>: ${user.balance} ₽
 
 <blockquote>Получай бонусы, выполняя задания \nиз раздела <b>${CMD.BONUS}</b></blockquote>
 <blockquote>Бонусы не сгорают со временем, ими можно \nоплачивать до 50% стоимости услуг в «Формуле»</blockquote>
@@ -46,13 +46,13 @@ const getBalanceKeyboard = () => {
 
 composer.hears(CMD.BALANCE, async (ctx) => {
     const user = await getUserData(ctx)
-    ctx.session.last_balance = user.bonus_balance
+    ctx.session.last_balance = user.balance
     ctx.session.last_invited = user.invited
     ctx.replyWithHTML(getBalanceReply(user), getBalanceKeyboard())
 })
 composer.command('balance', async (ctx) => {
     const user = await getUserData(ctx)
-    ctx.session.last_balance = user.bonus_balance
+    ctx.session.last_balance = user.balance
     ctx.session.last_invited = user.invited
     ctx.replyWithHTML(getBalanceReply(user), getBalanceKeyboard())
 })
@@ -63,14 +63,14 @@ composer.action(BALANCE_REFRESH, async (ctx) => {
     if (
         last_balance &&
         last_invited &&
-        (!_.isEqual(last_balance, user.bonus_balance) || !_.isEqual(last_invited, user.invited))
+        (!_.isEqual(last_balance, user.balance) || !_.isEqual(last_invited, user.invited))
     ) {
         ctx.editMessageText(getBalanceReply(user), {
             parse_mode: 'HTML',
             ...getBalanceKeyboard(),
         })
     }
-    ctx.session.last_balance = user.bonus_balance
+    ctx.session.last_balance = user.balance
     ctx.session.last_invited = user.invited
     setTimeout(() => {
         ctx.answerCbQuery('Информация обновлена')

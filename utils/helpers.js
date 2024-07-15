@@ -89,6 +89,36 @@ export const getUserByClientPhone = async (phoneNumber, client) => {
     }
 }
 
+export const getUserByUsername = async (username) => {
+    try {
+        // Ищем пользователя по username (полученное из invited_from)
+        const findUserRes = await db.collection('barber-users').where(Filter.where('username', '==', username))
+        const snapshot = await findUserRes.get()
+
+        if (snapshot.empty) {
+            // Оповещаем, что пользователь не найден
+            const err = `Пользователь с никнеймом ${username} не найден в боте`
+            console.log(err)
+            return
+        }
+        if (snapshot.size > 1) {
+            const err = `Найдено несколько пользователей с одинаковым никнеймом: ${username}`
+            console.log(err)
+            await sendBotMessage(ADMIN_CHAT_ID, err)
+            return
+        }
+
+        // Получаем данные пользователя
+        const user = snapshot.docs[0].data()
+        console.log('Найден пользователь', user)
+        return user
+    } catch (e) {
+        console.error(e)
+        await sendBotMessage(ADMIN_CHAT_ID, e)
+        return false
+    }
+}
+
 export const updateNoticeByRecordId = async (record_id, date) => {
     const noticeRef = db.collection('barber-notices').doc(String(record_id))
     const doc = await noticeRef.get()
@@ -117,4 +147,80 @@ export const deleteNoticeByRecordId = async (record_id) => {
     await noticeRef.delete()
     console.log(`Уведомление о записи №${record_id} удалено`)
     return true
+}
+
+export const setUserUsedServices = async (user_id) => {
+    return await db.collection('barber-users').doc(String(user_id)).update({ used_services: true })
+}
+
+export const bonusRewardForReferral = async (username, referral) => {
+    const userData = await getUserByUsername(username)
+    const userRef = db.collection('barber-users').doc(String(userData.id))
+
+    // Считаем номер успешного реферала
+    const invite_number = userData.invited.reduce((count, invited_user) => {
+        return Number(invited_user.used_services)
+    }, 1)
+    let bonus_reward = 0
+
+    // Считаем вознаграждение за этого реферала
+    switch (invite_number) {
+        // 1-2 друга
+        case 1:
+        case 2:
+            bonus_reward = 200
+            break
+        // 3-5 друзей
+        case 3:
+        case 4:
+        case 5:
+            bonus_reward = 300
+            break
+        // от 6 друзей
+        default:
+            bonus_reward = 500
+            break
+    }
+
+    // Обновляем инфу о реферале в массиве invited юзера
+    const invited = userData.invited.map((invited_user) => {
+        if (invited_user.id === referral.id) {
+            return {
+                ...invited_user,
+                used_services: true,
+                bonus_reward: bonus_reward,
+            }
+        }
+        return invited_user
+    })
+    await userRef.update({ invited })
+
+    // Начисляем вознаграждение
+    await userRef.update({ balance: userData.balance + bonus_reward })
+
+    return {
+        user: userData,
+        bonus_reward,
+        invite_number,
+    }
+}
+
+export const getRewardUserMessage = (invited_user, bonus_reward) => {
+    return `💸 Тебе начислено ${bonus_reward} бонусов на счет за приглашенного друга @${invited_user.username}!`
+}
+
+export const getRewardAdminMessage = (user, invited_user, invite_number, bonus_reward) => {
+    return `<b>💸 Начисление бонусов!</b>
+
+<b>Аккаунт:</b> <a href="https://t.me/${user.username}">${user.username}</a>
+<b>Номер:</b> ${user.phone.prefix}${user.phone.number}
+<b>Имя:</b> ${user.first_name ?? ''} ${user.last_name ?? ''}
+<b>Причина:</b> ${invite_number}-ый реферал <a href="https://t.me/${invited_user.username}">${invited_user.username}</a>
+<b>Начислено:</b> ${bonus_reward} ₽`
+}
+
+export const noticeAboutRewardForReferral = async (rewardInfo, invited_user) => {
+    const { user, bonus_reward, invite_number } = rewardInfo
+    await sendBotMessage(user.id, getRewardUserMessage(invited_user, bonus_reward))
+    await sendBotMessage(ADMIN_CHAT_ID, getRewardAdminMessage(user, invited_user, invite_number, bonus_reward))
 }
