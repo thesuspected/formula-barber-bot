@@ -184,8 +184,8 @@ export const bonusRewardForReferral = async (username, referral) => {
 
     // Обновляем инфу о реферале в массиве invited юзера
     const invited = userData.invited.map((invited_user) => {
-        console.log(invited_user.user_id, referral.id)
-        if (invited_user.user_id === referral.id) {
+        console.log(invited_user.user_id, referral.id, invited_user.user_id === referral.id)
+        if (Number(invited_user.user_id) === Number(referral.id)) {
             return {
                 ...invited_user,
                 used_services: true,
