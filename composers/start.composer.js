@@ -78,7 +78,7 @@ const checkUserAuth = async (ctx) => {
     const user = (await db.collection('barber-users').doc(userId).get()).data()
     return !!user
 }
-const getNewReferalUserMessage = (ctx) => {
+const getNewReferralUserMessage = (ctx) => {
     return `По твоей реферальной ссылке зарегистрировался @${ctx.from.username}!
 Баллы начислятся после посещения барбершопа приглашенным 💸`
 }
@@ -134,7 +134,7 @@ const writeNewUser = async (ctx) => {
         const user = await getUserByUsername(ctx.session.invited_from)
         if (user) {
             await pushUserToInvitedArray(user, userId, ctx.from.username)
-            await sendBotMessage(user.id, getNewReferalUserMessage(ctx))
+            await sendBotMessage(user.id, getNewReferralUserMessage(ctx))
         }
     }
 
