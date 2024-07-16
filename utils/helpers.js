@@ -159,7 +159,7 @@ export const bonusRewardForReferral = async (username, referral) => {
 
     // Считаем номер успешного реферала
     const invite_number = userData.invited.reduce((count, invited_user) => {
-        return Number(invited_user.used_services)
+        return count + Number(invited_user.used_services)
     }, 1)
     let bonus_reward = 0
 
@@ -184,7 +184,8 @@ export const bonusRewardForReferral = async (username, referral) => {
 
     // Обновляем инфу о реферале в массиве invited юзера
     const invited = userData.invited.map((invited_user) => {
-        if (invited_user.id === referral.id) {
+        console.log(invited_user.user_id, referral.id)
+        if (invited_user.user_id === referral.id) {
             return {
                 ...invited_user,
                 used_services: true,
@@ -193,6 +194,7 @@ export const bonusRewardForReferral = async (username, referral) => {
         }
         return invited_user
     })
+    console.log('invited =', invited)
     await userRef.update({ invited })
 
     // Начисляем вознаграждение

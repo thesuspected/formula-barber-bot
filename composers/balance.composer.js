@@ -24,7 +24,7 @@ const getReferralsMessage = (user) => {
     let invited = '<u><b>Рефералы:</b></u>\n'
     if (user.invited.length) {
         user.invited.forEach((value) => {
-            invited += `@${value.username} - ${value.used_services ? '✅ Вознаграждение получено' : '⏳ Ожидаем посещения'}\n`
+            invited += `@${value.username} - ${value.used_services ? `✅ Вознаграждение получено (${value.bonus_reward} ₽)` : '⏳ Ожидаем посещения'}\n`
         })
         invited += '\n'
     } else {
