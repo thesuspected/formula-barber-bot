@@ -158,11 +158,10 @@ const writeNewUser = async (ctx) => {
     const { phone_number } = ctx.message.contact
     const number = phone_number.slice(phone_number.length - 10)
     const prefix = phone_number.substring(0, phone_number.length - 10)
-    const { invited_from } = ctx.session
 
     // Ищем юзера yclients
     const isRegisteredYclients = await isRegisteredInYclients(number)
-    ctx.session.invite_rewarded = invited_from && !isRegisteredYclients
+    ctx.session.invite_rewarded = ctx.session?.invited_from && !isRegisteredYclients
 
     const userRef = db.collection('barber-users').doc(userId)
     const res = await userRef.set({
@@ -172,14 +171,14 @@ const writeNewUser = async (ctx) => {
         },
         ...ctx.from,
         invited: [], // Список приглашенных
-        invited_from: invited_from ?? null,
+        invited_from: ctx.session?.invited_from ?? null,
         balance: ctx.session?.invite_rewarded ? 200 : 0,
         used_services: isRegisteredYclients, // Оплачивал ли услуги в барбершопе
     })
 
     // Если приглашен кем-то, добавляем инфу об этом
-    if (invited_from) {
-        const user = await getUserByUsername(invited_from)
+    if (ctx.session?.invited_from) {
+        const user = await getUserByUsername(ctx.session?.invited_from)
         if (user) {
             // Если уже есть в базе yclients, оповещаем
             if (isRegisteredYclients) {
