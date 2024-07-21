@@ -31,6 +31,15 @@ composer.use(async (ctx, next) => {
 })
 // Auth Middleware
 composer.use(async (ctx, next) => {
+    if (!ctx.session) {
+        ctx.session = {
+            auth: false,
+            invited_from: undefined,
+            invite_rewarded: undefined,
+            last_balance: undefined,
+            last_invited: undefined,
+        }
+    }
     // Get phone_number
     if (ctx.message && ctx.message.contact) {
         await writeNewUser(ctx)
@@ -40,15 +49,6 @@ composer.use(async (ctx, next) => {
             },
             ...getMainKeyboard(),
         })
-    }
-    if (!ctx.session) {
-        ctx.session = {
-            auth: false,
-            invited_from: undefined,
-            invite_rewarded: undefined,
-            last_balance: undefined,
-            last_invited: undefined,
-        }
     }
     if (!ctx.session.auth) {
         const isUserExist = await checkUserAuth(ctx)
@@ -161,7 +161,7 @@ const writeNewUser = async (ctx) => {
 
     // Ищем юзера yclients
     const isRegisteredYclients = await isRegisteredInYclients(number)
-    ctx.session.invite_rewarded = ctx.session?.invited_from && !isRegisteredYclients
+    ctx.session.invite_rewarded = ctx.session.invited_from && !isRegisteredYclients
 
     const userRef = db.collection('barber-users').doc(userId)
     const res = await userRef.set({
@@ -171,14 +171,14 @@ const writeNewUser = async (ctx) => {
         },
         ...ctx.from,
         invited: [], // Список приглашенных
-        invited_from: ctx.session?.invited_from ?? null,
-        balance: ctx.session?.invite_rewarded ? 200 : 0,
+        invited_from: ctx.session.invited_from ?? null,
+        balance: ctx.session.invite_rewarded ? 200 : 0,
         used_services: isRegisteredYclients, // Оплачивал ли услуги в барбершопе
     })
 
     // Если приглашен кем-то, добавляем инфу об этом
-    if (ctx.session?.invited_from) {
-        const user = await getUserByUsername(ctx.session?.invited_from)
+    if (ctx.session.invited_from) {
+        const user = await getUserByUsername(ctx.session.invited_from)
         if (user) {
             // Если уже есть в базе yclients, оповещаем
             if (isRegisteredYclients) {
