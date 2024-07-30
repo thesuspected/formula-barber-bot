@@ -1,3 +1,5 @@
+import { getUserLink } from './utils/helpers.js'
+
 export const getStartMessage = (name) => {
     return `Привет, ${name}! 👋
 
@@ -9,18 +11,20 @@ export const getStartMessage = (name) => {
 
 export const getPhoneMessage = (name, invited_from) => {
     let invited_text = ''
+    console.log(invited_from)
     if (invited_from) {
-        invited_text = `<blockquote>Ты был приглашен @${invited_from} 🤝</blockquote>`
+        invited_text = `<blockquote>Ты был приглашен ${getUserLink(invited_from)} 🤝</blockquote>`
     }
     return `${name}, приветствуем тебя в Формуле! 👋
 Для корректной работы бота поделись с нами контактом ⬇️ ${invited_text}`
 }
 
 export const getPhonePleasureMessage = (ctx) => {
+    const { invite_rewarded, invited_from } = ctx.session
     let reward_text = ''
-    if (ctx.session.invite_rewarded) {
+    if (invite_rewarded) {
         reward_text = `
-<blockquote>Ты был приглашен @${ctx.session.invited_from} 🤝
+<blockquote>Ты был приглашен ${getUserLink(invited_from)} 🤝
 И получаешь 200 бонусов на счет! 🎁</blockquote>`
     }
     return `Спасибо, что выбрал нас!🔥

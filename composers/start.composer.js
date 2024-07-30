@@ -3,7 +3,7 @@ import { getPhoneMessage, getPhonePleasureMessage, getStartMessage } from '../he
 import { getMainKeyboard, getPhoneKeyboard } from '../keyboards.js'
 import { db } from '../config/firebase.js'
 import { sendBotMessage } from '../barber.js'
-import { getUserByUsername } from '../utils/helpers.js'
+import { getUserById, getUserLink } from '../utils/helpers.js'
 import axios from 'axios'
 
 const composer = new Composer()
@@ -23,7 +23,7 @@ composer.use(async (ctx, next) => {
     if (ctx.update?.callback_query) {
         text = ctx.update.callback_query.data
     }
-    const log = `<a href="https://t.me/${ctx.from.username}">${ctx.from.username}</a>: ${text}`
+    const log = `<a href="tg://user?id=${ctx.from.id}">${ctx.from.username ?? ctx.from.first_name}</a>: ${text}`
     console.log(log, `(chat_id: ${ctx.chat.id})`)
     await sendBotMessage(ADMIN_CHAT_ID, log)
     // console.log(ctx) // uncomment for log ctx
@@ -38,6 +38,7 @@ composer.use(async (ctx, next) => {
             invite_rewarded: undefined,
             last_balance: undefined,
             last_invited: undefined,
+            admin_edited_user: undefined,
         }
     }
     // Get phone_number
@@ -55,37 +56,48 @@ composer.use(async (ctx, next) => {
         if (isUserExist) {
             ctx.session.auth = true
         } else {
-            ctx.session.invited_from = checkInvitedFromAccount(ctx)
-            await ctx.replyWithHTML(getPhoneMessage(ctx.from.first_name, ctx.session.invited_from), getPhoneKeyboard())
+            ctx.session.invited_from = await checkInvitedFromAccount(ctx)
+            await ctx.replyWithHTML(getPhoneMessage(ctx.from.first_name, ctx.session.invited_from), {
+                link_preview_options: {
+                    is_disabled: true,
+                },
+                ...getPhoneKeyboard(),
+            })
             return
         }
     }
     await next()
 })
 // Check invited from account
-const checkInvitedFromAccount = (ctx) => {
+const checkInvitedFromAccount = async (ctx) => {
     const message = ctx.message.text.split(' ')
     const command = message[0]
-    const username = message[1]
+    const id = message[1]
     // Если /start username
-    if (command === '/start' && username) {
-        console.log(`Пользователь ${ctx.from.username} приглашен в бота от ${username}`)
-        return username
+    if (command === '/start' && id) {
+        const user = await getUserById(id)
+        console.log(`Пользователь ${ctx.from.username} приглашен в бота от ${user.username ?? user.first_name}`)
+        return user
     }
     return undefined
 }
 // Check User Auth
 const checkUserAuth = async (ctx) => {
     const userId = String(ctx.from.id)
-    const user = (await db.collection('barber-users').doc(userId).get()).data()
-    return !!user
+    const userRef = db.collection('barber-users').doc(userId)
+    const userData = (await userRef.get()).data()
+    if (userData) {
+        // Обновляем поля юзера тг
+        await userRef.update({ ...ctx.from })
+    }
+    return !!userData
 }
 const getNewReferralUserMessage = (ctx) => {
-    return `По твоей реферальной ссылке зарегистрировался @${ctx.from.username}!
+    return `По твоей реферальной ссылке зарегистрировался ${getUserLink(ctx.from)}!
 Баллы начислятся после посещения барбершопа приглашенным 💸`
 }
 const getReferralFromYclientsMessage = (ctx) => {
-    return `По твоей реферальной ссылке зарегистрировался @${ctx.from.username}!
+    return `По твоей реферальной ссылке зарегистрировался ${getUserLink(ctx.from)}!
 К сожалению, он уже пользовался услугами барбершопа, 
 бонусы за его приглашение не будут начислены :с`
 }
@@ -93,7 +105,7 @@ const getNewClientMessage = (ctx, phone_number, isRegisteredYclients) => {
     let invited_text = ''
     if (ctx.session.invited_from) {
         invited_text = `
-<b>Приглашен:</b> <a href="https://t.me/${ctx.session.invited_from}">${ctx.session.invited_from}</a>`
+<b>Приглашен:</b> ${getUserLink(ctx.session.invited_from)}`
     }
     let registered_text = ''
     if (isRegisteredYclients) {
@@ -102,20 +114,23 @@ const getNewClientMessage = (ctx, phone_number, isRegisteredYclients) => {
     }
     return `<b>✅ Новый клиент!</b>
 
-<b>Аккаунт:</b> <a href="https://t.me/${ctx.from.username}">${ctx.from.username}</a>
+<b>Аккаунт:</b> ${getUserLink(ctx.from)}
 <b>Номер:</b> ${phone_number}
 <b>Имя:</b> ${ctx.from.first_name ?? ''} ${ctx.from.last_name ?? ''}${invited_text}${registered_text}`
 }
-const pushUserToInvitedArray = async (user, ref_id, ref_username) => {
+const pushUserToInvitedArray = async (user, invited_user) => {
     // Добавляем в массив приглашенных
     let invited = user.invited
-    const findUser = invited.find((invited_user) => invited_user.user_id === ref_id)
+    const findUser = invited.find((invited_user) => invited_user.id === String(invited_user.id))
     if (findUser) {
-        console.log(`Пользователь ${ref_username} уже в списке приглашенных у ${user.username}`)
+        console.log(
+            `Пользователь ${invited_user.username ?? invited_user.first_name} уже в списке приглашенных у ${user.username}`
+        )
     } else {
         invited.push({
-            user_id: ref_id,
-            username: ref_username,
+            id: String(invited_user.id),
+            username: invited_user.username,
+            first_name: invited_user.first_name,
             used_services: false,
         })
     }
@@ -171,22 +186,20 @@ const writeNewUser = async (ctx) => {
         },
         ...ctx.from,
         invited: [], // Список приглашенных
-        invited_from: ctx.session.invited_from ?? null,
+        invited_from: ctx.session.invited_from ? ctx.session.invited_from.id : null,
         balance: ctx.session.invite_rewarded ? 200 : 0,
         used_services: isRegisteredYclients, // Оплачивал ли услуги в барбершопе
     })
 
     // Если приглашен кем-то, добавляем инфу об этом
     if (ctx.session.invited_from) {
-        const user = await getUserByUsername(ctx.session.invited_from)
-        if (user) {
-            // Если уже есть в базе yclients, оповещаем
-            if (isRegisteredYclients) {
-                await sendBotMessage(user.id, getReferralFromYclientsMessage(ctx))
-            } else {
-                await pushUserToInvitedArray(user, userId, ctx.from.username)
-                await sendBotMessage(user.id, getNewReferralUserMessage(ctx))
-            }
+        const user = ctx.session.invited_from
+        // Если уже есть в базе yclients, оповещаем
+        if (isRegisteredYclients) {
+            await sendBotMessage(user.id, getReferralFromYclientsMessage(ctx))
+        } else {
+            await pushUserToInvitedArray(user, ctx.from)
+            await sendBotMessage(user.id, getNewReferralUserMessage(ctx))
         }
     }
 

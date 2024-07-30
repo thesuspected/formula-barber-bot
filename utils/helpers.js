@@ -89,6 +89,34 @@ export const getUserByClientPhone = async (phoneNumber, client) => {
     }
 }
 
+export const getUserLink = (user) => {
+    if (user.username) {
+        return `<a href="https://t.me/${user.username}">${user.username}</a>`
+    }
+    return `<a href="tg://user?id=${user.id}">${user.first_name}</a>`
+}
+
+export const getUserById = async (id) => {
+    const userRef = db.collection('barber-users').doc(String(id))
+    return (await userRef.get()).data()
+}
+
+export const getUserByPhone = async (phone) => {
+    // Ищем пользователя по номеру телефона без префикса +7
+    const findUserRes = await db.collection('barber-users').where(Filter.where('phone.number', '==', phone))
+    const snapshot = await findUserRes.get()
+
+    if (snapshot.empty) {
+        return
+    }
+
+    // Получаем данные пользователя
+    const user = snapshot.docs[0].data()
+    console.log('Найден пользователь', user)
+
+    return user
+}
+
 export const getUserByUsername = async (username) => {
     try {
         // Ищем пользователя по username (полученное из invited_from)
@@ -153,8 +181,8 @@ export const setUserUsedServices = async (user_id) => {
     return await db.collection('barber-users').doc(String(user_id)).update({ used_services: true })
 }
 
-export const bonusRewardForReferral = async (username, referral) => {
-    const userData = await getUserByUsername(username)
+export const bonusRewardForReferral = async (id, referral) => {
+    const userData = await getUserById(id)
     const userRef = db.collection('barber-users').doc(String(userData.id))
 
     // Считаем номер успешного реферала
@@ -184,8 +212,8 @@ export const bonusRewardForReferral = async (username, referral) => {
 
     // Обновляем инфу о реферале в массиве invited юзера
     const invited = userData.invited.map((invited_user) => {
-        console.log(invited_user.user_id, referral.id, invited_user.user_id === referral.id)
-        if (Number(invited_user.user_id) === Number(referral.id)) {
+        console.log(invited_user.id, referral.id, invited_user.id === referral.id)
+        if (Number(invited_user.id) === Number(referral.id)) {
             return {
                 ...invited_user,
                 used_services: true,
@@ -214,10 +242,10 @@ export const getRewardUserMessage = (invited_user, bonus_reward) => {
 export const getRewardAdminMessage = (user, invited_user, invite_number, bonus_reward) => {
     return `<b>💸 Начисление бонусов!</b>
 
-<b>Аккаунт:</b> <a href="https://t.me/${user.username}">${user.username}</a>
+<b>Аккаунт:</b> ${getUserLink(user)}
 <b>Номер:</b> ${user.phone.prefix}${user.phone.number}
 <b>Имя:</b> ${user.first_name ?? ''} ${user.last_name ?? ''}
-<b>Причина:</b> ${invite_number}-ый реферал <a href="https://t.me/${invited_user.username}">${invited_user.username}</a>
+<b>Причина:</b> ${invite_number}-ый реферал ${getUserLink(invited_user)}
 <b>Начислено:</b> ${bonus_reward} ₽`
 }
 

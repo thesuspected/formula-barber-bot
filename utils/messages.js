@@ -1,3 +1,5 @@
+import { getUserLink } from './helpers.js'
+
 export const getNewEntryUserMessage = (user, staff, date) => {
     return `✅ ${user.first_name}, ты записан к мастеру <b>${staff.name}</b> на ${date}
 Ждем тебя в Формуле! 🏎`
@@ -20,7 +22,7 @@ export const getEntryBeforeHourNotice = (user_name, staff_name, time) => {
 export const getNewEntryAdminMessage = (user, staff, date) => {
     return `<b>📆 Новая запись!</b>
 
-<b>Аккаунт:</b> <a href="https://t.me/${user.username}">${user.username}</a>
+<b>Аккаунт:</b> ${getUserLink(user)}
 <b>Номер:</b> ${user.phone.prefix}${user.phone.number}
 <b>Имя:</b> ${user.first_name ?? ''} ${user.last_name ?? ''}
 <b>Запись:</b> ${date}
@@ -30,7 +32,7 @@ export const getNewEntryAdminMessage = (user, staff, date) => {
 export const getUpdateEntryAdminMessage = (user, staff, date, oldDate) => {
     return `<b>↪️📆 Перенесена запись!</b>
 
-<b>Аккаунт:</b> <a href="https://t.me/${user.username}">${user.username}</a>
+<b>Аккаунт:</b> ${getUserLink(user)}
 <b>Номер:</b> ${user.phone.prefix}${user.phone.number}
 <b>Имя:</b> ${user.first_name ?? ''} ${user.last_name ?? ''}
 <b>Запись До:</b> ${oldDate}
@@ -41,7 +43,7 @@ export const getUpdateEntryAdminMessage = (user, staff, date, oldDate) => {
 export const getDeleteEntryAdminMessage = (user, staff, date) => {
     return `<b>❌📆 Удалена запись!</b>
 
-<b>Аккаунт:</b> <a href="https://t.me/${user.username}">${user.username}</a>
+<b>Аккаунт:</b> ${getUserLink(user)}
 <b>Номер:</b> ${user.phone.prefix}${user.phone.number}
 <b>Имя:</b> ${user.first_name ?? ''} ${user.last_name ?? ''}
 <b>Запись:</b> ${date}

@@ -57,7 +57,7 @@ export const getInviteFriendMessage = (ctx) => {
 <blockquote expandable>❗️Учитываются новые клиенты, которые ранее не пользовались нашими услугами. Бонусы зачислятся на счет автоматически после первого посещения барбершопа приглашенным :)</blockquote>
 
 Реферальная ссылка:
-<code>https://t.me/FormulaBarberBot?start=${ctx.from.username}</code>`
+<code>https://t.me/FormulaBarberBot?start=${ctx.from.id}</code>`
 }
 
 export const getBonusKeyboard = () => {

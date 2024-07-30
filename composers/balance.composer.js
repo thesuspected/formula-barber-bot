@@ -2,6 +2,7 @@ import { db } from '../config/firebase.js'
 import { Composer, Markup } from 'telegraf'
 import { CMD } from '../const.js'
 import _ from 'lodash'
+import { getUserLink } from '../utils/helpers.js'
 
 const composer = new Composer()
 
@@ -24,14 +25,14 @@ const getReferralsMessage = (user) => {
     let invited = '<u><b>Рефералы:</b></u>\n'
     if (user.invited.length) {
         user.invited.forEach((value) => {
-            invited += `@${value.username} - ${value.used_services ? `✅ Вознаграждение получено (${value.bonus_reward} ₽)` : '⏳ Ожидаем посещения'}\n`
+            invited += `${getUserLink(value)} - ${value.used_services ? `✅ Вознаграждение получено (${value.bonus_reward} ₽)` : '⏳ Ожидаем посещения'}\n`
         })
         invited += '\n'
     } else {
         invited += '<blockquote>Здесь появятся приглашенные тобой люди</blockquote>\n'
     }
     return `\n${invited}Реферальная ссылка:
-<code>https://t.me/FormulaBarberBot?start=${user.username}</code>`
+<code>https://t.me/FormulaBarberBot?start=${user.id}</code>`
 }
 
 const getBalanceReply = (user) => {
