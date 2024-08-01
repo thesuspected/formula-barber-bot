@@ -7,7 +7,7 @@ export const CMD = {
 }
 
 export const BACK_BUTTON = '⬅️ Назад'
-export const SHARE_CONTACT = '📢 Поделиться контактом'
+export const SHARE_CONTACT = '✅ Поделиться контактом ✅'
 
 export const dateLocales = [
     'января',

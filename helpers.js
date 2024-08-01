@@ -16,7 +16,8 @@ export const getPhoneMessage = (name, invited_from) => {
         invited_text = `<blockquote>Ты был приглашен ${getUserLink(invited_from)} 🤝</blockquote>`
     }
     return `${name}, приветствуем тебя в Формуле! 👋
-Для корректной работы бота поделись с нами контактом ⬇️ ${invited_text}`
+Для корректной работы бота поделись с нами контактом,
+нажав кнопку внизу ⬇️ ${invited_text}`
 }
 
 export const getPhonePleasureMessage = (ctx) => {
