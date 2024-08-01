@@ -23,7 +23,7 @@ composer.use(async (ctx, next) => {
     if (ctx.update?.callback_query) {
         text = ctx.update.callback_query.data
     }
-    const log = `<a href="tg://user?id=${ctx.from.id}">${ctx.from.username ?? ctx.from.first_name}</a>: ${text}`
+    const log = `${getUserLink(ctx.from)}: ${text}`
     console.log(log, `(chat_id: ${ctx.chat.id})`)
     await sendBotMessage(ADMIN_CHAT_ID, log)
     // console.log(ctx) // uncomment for log ctx
@@ -34,6 +34,7 @@ composer.use(async (ctx, next) => {
     if (!ctx.session) {
         ctx.session = {
             auth: false,
+            phone: undefined,
             invited_from: undefined,
             invite_rewarded: undefined,
             last_balance: undefined,
@@ -89,6 +90,7 @@ const checkUserAuth = async (ctx) => {
     if (userData) {
         // Обновляем поля юзера тг
         await userRef.update({ ...ctx.from })
+        ctx.session.phone = userData.phone
     }
     return !!userData
 }
@@ -173,6 +175,10 @@ const writeNewUser = async (ctx) => {
     const { phone_number } = ctx.message.contact
     const number = phone_number.slice(phone_number.length - 10)
     const prefix = phone_number.substring(0, phone_number.length - 10)
+    const phone = {
+        number,
+        prefix,
+    }
 
     // Ищем юзера yclients
     const isRegisteredYclients = await isRegisteredInYclients(number)
@@ -180,10 +186,7 @@ const writeNewUser = async (ctx) => {
 
     const userRef = db.collection('barber-users').doc(userId)
     const res = await userRef.set({
-        phone: {
-            number,
-            prefix,
-        },
+        phone,
         ...ctx.from,
         invited: [], // Список приглашенных
         invited_from: ctx.session.invited_from ? ctx.session.invited_from.id : null,
@@ -205,6 +208,7 @@ const writeNewUser = async (ctx) => {
 
     if (res) {
         ctx.session.auth = true
+        ctx.session.phone = phone
         const log = getNewClientMessage(ctx, phone_number, isRegisteredYclients)
         console.log(log)
         await sendBotMessage(ADMIN_CHAT_ID, log)
