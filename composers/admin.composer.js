@@ -7,7 +7,7 @@ import { sendBotMessage } from '../barber.js'
 const { ADMIN_CHAT_ID } = process.env
 
 const composer = new Composer()
-const ADMIN_ARRAY = ['zuspect', 'Smnv3798', 'Lissssa_27']
+const ADMIN_ARRAY = ['zuspect', 'Smnv3798', 'Lissssa_27', 'formula_barber']
 const ADMIN_ACTIONS = {
     ADD_BONUS: '➕ Начислить',
     REMOVE_BONUS: '➖ Списать',
