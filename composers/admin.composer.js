@@ -39,7 +39,7 @@ const getUserInfoMessage = (user) => {
 const getUserInfoKeyboard = () => {
     return Markup.inlineKeyboard([
         Markup.button.callback(ADMIN_ACTIONS.ADD_BONUS, ADMIN_ACTIONS.ADD_BONUS),
-        Markup.button.callback(ADMIN_ACTIONS.REMOVE_BONUS, ADMIN_ACTIONS.REMOVE_BONUS),
+        // Markup.button.callback(ADMIN_ACTIONS.REMOVE_BONUS, ADMIN_ACTIONS.REMOVE_BONUS),
     ]).resize()
 }
 
