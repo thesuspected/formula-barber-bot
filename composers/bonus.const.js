@@ -10,6 +10,11 @@ export const BONUS = {
     INVITE_FRIEND_FROM_SCHEDULE: '🤝🏻 Пригласи друга 📅',
     PAIR_HAIR_FROM_SCHEDULE: '💇🏼💇🏽 Парная стрижка 📅',
 }
+export const BONUS_REVIEW = {
+    YANDEX: '🔴 Яндекс Карты',
+    GIS: '🟢 2ГИС',
+    YCLIENTS: '🟡 YCLIENTS',
+}
 export const BONUS_TEXT = {
     PAIR_HAIR: `<u><b>${BONUS.PAIR_HAIR}</b></u>
 
@@ -76,9 +81,9 @@ export const getBonusKeyboard = () => {
 export const getReviewsKeyboard = (text = BACK_BUTTON, action = BACK_BUTTON) => {
     return Markup.inlineKeyboard([
         [
-            Markup.button.webApp('🔴 Яндекс Карты', 'https://yandex.ru/maps/org/formula/106787443492/reviews'),
-            Markup.button.webApp('🟢 2ГИС', 'https://2gis.ru/saratov/firm/70000001089511981/tab/reviews'),
-            Markup.button.webApp('🟡 YCLIENTS', 'https://n1149259.yclients.com/company/1057728/about'),
+            Markup.button.webApp(BONUS_REVIEW.YANDEX, 'https://yandex.ru/maps/org/formula/106787443492/reviews'),
+            Markup.button.webApp(BONUS_REVIEW.GIS, 'https://2gis.ru/saratov/firm/70000001089511981/tab/reviews'),
+            Markup.button.webApp(BONUS_REVIEW.YCLIENTS, 'https://n1149259.yclients.com/company/1057728/about'),
         ],
         [Markup.button.callback(text, action)],
     ]).resize()
