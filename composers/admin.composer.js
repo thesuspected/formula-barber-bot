@@ -34,12 +34,10 @@ const getUserInfoMessage = (user) => {
         const { MARK, REVIEW } = user.bonusState
         bonus_text += '\n\n<b>Отзывы:</b>'
         for (const key in REVIEW) {
-            console.log(key, BONUS_REVIEW[key])
             bonus_text += `\n${BONUS_REVIEW[key]}: ${REVIEW[key] ? '✅' : '❌'}`
         }
         bonus_text += '\n\n<b>Отметки:</b>'
         for (const key in MARK) {
-            console.log(key, MARK_REASON[key])
             bonus_text += `\n${MARK_REASON[key]}: ${MARK[key] ? '✅' : '❌'}`
         }
     }
