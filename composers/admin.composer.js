@@ -39,7 +39,7 @@ const getUserInfoMessage = (user) => {
 const getUserInfoKeyboard = () => {
     return Markup.inlineKeyboard([
         Markup.button.callback(ADMIN_ACTIONS.ADD_BONUS, ADMIN_ACTIONS.ADD_BONUS),
-        // Markup.button.callback(ADMIN_ACTIONS.REMOVE_BONUS, ADMIN_ACTIONS.REMOVE_BONUS),
+        Markup.button.callback(ADMIN_ACTIONS.REMOVE_BONUS, ADMIN_ACTIONS.REMOVE_BONUS),
     ]).resize()
 }
 
@@ -96,6 +96,19 @@ const addBonusToClient = async (user, payload, reason_text) => {
     await sendBotMessage(user.id, message_text)
 }
 
+const removeBonusFromClient = async (user, count) => {
+    const userRef = db.collection('barber-users').doc(String(user.id))
+    // Если бонусов меньше, чем запросили
+    if (user.balance < count) {
+        return
+    }
+    await userRef.update({ balance: user.balance - count })
+    // Оповещаем клиента
+    const message_text = `С вашего баланса списано ${count} бонусов в счет услуг барбершопа 💸`
+    await sendBotMessage(user.id, message_text)
+    return true
+}
+
 const addBonusWizardScene = new Scenes.WizardScene(
     ADMIN_WIZARD.ADD_BONUS,
     // Начало сцены
@@ -149,7 +162,7 @@ const addBonusWizardScene = new Scenes.WizardScene(
         }
         return ctx.wizard.next()
     },
-
+    // Получаем подпричину, начисляем бонусы, уведомляем
     async (ctx) => {
         let sub_reason = '...'
         if (ctx.update?.callback_query) {
@@ -177,7 +190,7 @@ const addBonusWizardScene = new Scenes.WizardScene(
         // Начисляем бонусы
         await addBonusToClient(ctx.session.admin_edited_user, ctx.wizard.state.bonus, reason_text)
         // Оповещаем админа
-        const message_text = `✅ Готово\n\nКлиенту ${getUserLink(ctx.session.admin_edited_user)} начислено ${ctx.wizard.state.bonus.count} бонусов за ${reason_text}`
+        const message_text = `➕ Начисление\n\nКлиенту ${getUserLink(ctx.session.admin_edited_user)} начислено ${ctx.wizard.state.bonus.count} бонусов за ${reason_text}`
         await ctx.replyWithHTML(message_text, {
             link_preview_options: {
                 is_disabled: true,
@@ -189,7 +202,46 @@ const addBonusWizardScene = new Scenes.WizardScene(
     }
 )
 
-const stage = new Scenes.Stage([addBonusWizardScene])
+const removeBonusWizardScene = new Scenes.WizardScene(
+    ADMIN_WIZARD.REMOVE_BONUS,
+    // Начало сцены
+    async (ctx) => {
+        ctx.wizard.state.bonus = {}
+        await ctx.replyWithHTML(`Введите кол-во к списанию ${getUserLink(ctx.session.admin_edited_user)}:`, {
+            link_preview_options: {
+                is_disabled: true,
+            },
+        })
+        return ctx.wizard.next()
+    },
+    // Получаем число бонусов
+    async (ctx) => {
+        const count = Number(ctx.message.text)
+        // validation
+        if (!count || count < 1) {
+            await ctx.replyWithHTML('Введите валидное число!')
+            return
+        }
+        // Списываем бонусы
+        const success = await removeBonusFromClient(ctx.session.admin_edited_user, count)
+        if (!success) {
+            await ctx.replyWithHTML('Введенное кол-во меньше баланса клиента!')
+            return
+        }
+        // Оповещаем админа
+        const message_text = `➖ Списание\n\nУ клиента ${getUserLink(ctx.session.admin_edited_user)} списано ${count} бонусов`
+        await ctx.replyWithHTML(message_text, {
+            link_preview_options: {
+                is_disabled: true,
+            },
+        })
+        await sendBotMessage(ADMIN_CHAT_ID, message_text)
+        ctx.wizard.state.bonus = {}
+        return ctx.scene.leave()
+    }
+)
+
+const stage = new Scenes.Stage([addBonusWizardScene, removeBonusWizardScene])
 composer.use(stage.middleware())
 
 composer.action(ADMIN_ACTIONS.ADD_BONUS, async (ctx) => {
