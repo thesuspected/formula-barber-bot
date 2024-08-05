@@ -9,6 +9,7 @@ import BonusComposer from './composers/bonus.composer.js'
 import BalanceComposer from './composers/balance.composer.js'
 import ContactComposer from './composers/contact.composer.js'
 import AdminComposer from './composers/admin.composer.js'
+import ReviewComposer from './composers/review.composer.js'
 import './utils/cron-ping.js'
 import './utils/yclients-hook.js'
 
@@ -25,6 +26,8 @@ bot.use(BalanceComposer)
 bot.use(ContactComposer)
 // Админка
 bot.use(AdminComposer)
+
+bot.use(ReviewComposer)
 // 📍 Наш адрес
 bot.hears(CMD.ADDRESS, (ctx) => {
     ctx.replyWithPhoto(
