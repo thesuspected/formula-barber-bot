@@ -71,10 +71,13 @@ composer.use(async (ctx, next) => {
 })
 // Check invited from account
 const checkInvitedFromAccount = async (ctx) => {
+    if (!ctx.message?.text) {
+        return undefined
+    }
     const message = ctx.message.text.split(' ')
     const command = message[0]
     const id = message[1]
-    // Если /start username
+    // Если /start id
     if (command === '/start' && id) {
         const user = await getUserById(id)
         console.log(`Пользователь ${ctx.from.username} приглашен в бота от ${user.username ?? user.first_name}`)
