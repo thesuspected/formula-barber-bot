@@ -29,11 +29,25 @@ const MARK_REASON = {
 }
 
 const getUserInfoMessage = (user) => {
+    let bonus_text = ''
+    if (user.bonusState) {
+        const { MARK, REVIEW } = user.bonusState
+        bonus_text += '\n\n<b>Отзывы:</b>'
+        for (const key in REVIEW) {
+            console.log(key, BONUS_REVIEW[key])
+            bonus_text += `\n${BONUS_REVIEW[key]}: ${REVIEW[key] ? '✅' : '❌'}`
+        }
+        bonus_text += '\n\n<b>Отметки:</b>'
+        for (const key in MARK) {
+            console.log(key, MARK_REASON[key])
+            bonus_text += `\n${MARK_REASON[key]}: ${MARK[key] ? '✅' : '❌'}`
+        }
+    }
     return `<b>Аккаунт:</b> ${getUserLink(user)}
 <b>id:</b> ${user.id}
 <b>Номер:</b> ${user.phone.prefix}${user.phone.number}
 <b>Имя:</b> ${user.first_name ?? ''} ${user.last_name ?? ''}
-<b>Бонусы:</b> ${user.balance} ₽`
+<b>Баланс:</b> ${user.balance} ₽${bonus_text}`
 }
 
 const getUserInfoKeyboard = () => {
