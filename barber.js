@@ -26,7 +26,7 @@ bot.use(BalanceComposer)
 bot.use(ContactComposer)
 // Админка
 bot.use(AdminComposer)
-
+// Отзыв
 bot.use(ReviewComposer)
 // 📍 Наш адрес
 bot.hears(CMD.ADDRESS, (ctx) => {
