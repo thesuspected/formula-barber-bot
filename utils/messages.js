@@ -23,6 +23,7 @@ export const getNewEntryAdminMessage = (user, staff, date) => {
     return `<b>📆 Новая запись!</b>
 
 <b>Аккаунт:</b> ${getUserLink(user)}
+<b>id:</b> ${user.id}
 <b>Номер:</b> ${user.phone.prefix}${user.phone.number}
 <b>Имя:</b> ${user.first_name ?? ''} ${user.last_name ?? ''}
 <b>Запись:</b> ${date}
@@ -33,6 +34,7 @@ export const getUpdateEntryAdminMessage = (user, staff, date, oldDate) => {
     return `<b>↪️📆 Перенесена запись!</b>
 
 <b>Аккаунт:</b> ${getUserLink(user)}
+<b>id:</b> ${user.id}
 <b>Номер:</b> ${user.phone.prefix}${user.phone.number}
 <b>Имя:</b> ${user.first_name ?? ''} ${user.last_name ?? ''}
 <b>Запись До:</b> ${oldDate}
@@ -44,6 +46,7 @@ export const getDeleteEntryAdminMessage = (user, staff, date) => {
     return `<b>❌📆 Удалена запись!</b>
 
 <b>Аккаунт:</b> ${getUserLink(user)}
+<b>id:</b> ${user.id}
 <b>Номер:</b> ${user.phone.prefix}${user.phone.number}
 <b>Имя:</b> ${user.first_name ?? ''} ${user.last_name ?? ''}
 <b>Запись:</b> ${date}

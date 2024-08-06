@@ -120,6 +120,7 @@ const getNewClientMessage = (ctx, phone_number, isRegisteredYclients) => {
     return `<b>✅ Новый клиент!</b>
 
 <b>Аккаунт:</b> ${getUserLink(ctx.from)}
+<b>id:</b> ${ctx.from.id}
 <b>Номер:</b> ${phone_number}
 <b>Имя:</b> ${ctx.from.first_name ?? ''} ${ctx.from.last_name ?? ''}${invited_text}${registered_text}`
 }

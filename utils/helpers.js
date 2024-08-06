@@ -243,6 +243,7 @@ export const getRewardAdminMessage = (user, invited_user, invite_number, bonus_r
     return `<b>💸 Начисление бонусов!</b>
 
 <b>Аккаунт:</b> ${getUserLink(user)}
+<b>id:</b> ${user.id}
 <b>Номер:</b> ${user.phone.prefix}${user.phone.number}
 <b>Имя:</b> ${user.first_name ?? ''} ${user.last_name ?? ''}
 <b>Причина:</b> ${invite_number}-ый реферал ${getUserLink(invited_user)}
