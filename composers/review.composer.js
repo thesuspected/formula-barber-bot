@@ -1,4 +1,5 @@
 import { Composer, Markup, Scenes } from 'telegraf'
+import { getReviewsKeyboard } from './bonus.const.js'
 
 const REVIEW_WIZARD_SCENE = 'REVIEW_WIZARD_SCENE'
 const composer = new Composer()
@@ -41,9 +42,10 @@ const revieWizardScene = new Scenes.WizardScene(
                 // 5 балов
                 case REVIEW_SCENE.RATE_5:
                     await ctx.replyWithHTML(
-                        'Благодарим вас за высокую оценку! Будем рады если вы оставите отзыв о нас на картах. При следующей стрижке покажите его администратору и получите 100 бонусных рублей за каждый отзыв'
+                        'Благодарим вас за высокую оценку! Будем рады если вы оставите отзыв о нас на картах. При следующей стрижке покажите его администратору и получите 100 бонусных рублей за каждый отзыв',
+                        getReviewsKeyboard()
                     )
-                    break
+                    return ctx.scene.leave()
                 // 4-3 балла
                 case REVIEW_SCENE.RATE_4:
                 case REVIEW_SCENE.RATE_3:
@@ -65,6 +67,33 @@ const revieWizardScene = new Scenes.WizardScene(
             return
         }
         ctx.deleteMessage(ctx.wizard.state.review.message_id)
+        return ctx.wizard.next()
+    },
+    async (ctx) => {
+        if (ctx.message.text) {
+            console.log(ctx)
+            const reason = ctx.message.text
+            ctx.wizard.state.reason = reason
+            switch (ctx.wizard.state.review.rate) {
+                case REVIEW_SCENE.RATE_4:
+                case REVIEW_SCENE.RATE_3:
+                    await ctx.replyWithHTML(
+                        'Спасибо за ваш отзыв! Мы обязательно учтем ваши пожелания, чтобы стать лучше!'
+                    )
+                    break
+                case REVIEW_SCENE.RATE_2:
+                case REVIEW_SCENE.RATE_1:
+                    await ctx.replyWithHTML(
+                        'Нам очень жаль, что мы испортили вам впечатление, вся информация будет передана анонимно нашему руководству. Мы начислили на ваш счет 300 бонусных рублей в качестве извинений за предоставленные неудобства'
+                    )
+                    break
+                default:
+                    ctx.replyWithHTML('Оставьте отзыв')
+                    break
+            }
+        } else {
+            ctx.replyWithHTML('Оставьте отзыв')
+        }
         return ctx.scene.leave()
     }
 )
