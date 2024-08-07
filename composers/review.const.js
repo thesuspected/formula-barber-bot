@@ -1,5 +1,6 @@
 import { Markup } from 'telegraf'
 import { BONUS_REVIEW } from './bonus.const.js'
+import { getUserLink } from '../utils/helpers.js'
 
 export const REVIEW_WIZARD_SCENE = 'REVIEW_WIZARD_SCENE'
 export const REVIEW_SCORE = {
@@ -24,4 +25,17 @@ export const getReviewLinksKeyboard = () => {
         Markup.button.webApp(BONUS_REVIEW.GIS, 'https://2gis.ru/saratov/firm/70000001089511981/tab/reviews'),
         Markup.button.webApp(BONUS_REVIEW.YCLIENTS, 'https://n1149259.yclients.com/company/1057728/about'),
     ]).resize()
+}
+
+export const getAdminReviewMessage = (user, session, rate, reason = '-') => {
+    return `<b>💬 Новый отзыв!</b>
+
+<b>Аккаунт:</b> ${getUserLink(user)}
+<b>id:</b> ${user.id}
+<b>Номер:</b> ${session.phone.prefix}${session.phone.number}
+<b>Имя:</b> ${user.first_name ?? ''} ${user.last_name ?? ''}
+
+<b>Оценка:</b> ${rate}
+<b>Отзыв:</b> ${reason}
+`
 }
