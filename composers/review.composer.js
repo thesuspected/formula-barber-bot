@@ -13,14 +13,15 @@ import {
     REVIEW_WIZARD_SCENE,
 } from './review.const.js'
 import { sendBotMessage } from '../barber.js'
-import { getUserById } from '../utils/helpers.js'
+import { getUserById, getUserLink } from '../utils/helpers.js'
 import { ADMIN_ARRAY } from './admin.composer.js'
 
 const composer = new Composer()
 const { ADMIN_CHAT_ID } = process.env
 
-export const sendReviewRateMessage = async (user_id) => {
-    await sendBotMessage(user_id, getRateMessage(), getRateKeyboard())
+export const sendReviewRateMessage = async (user) => {
+    await sendBotMessage(user.id, getRateMessage(), getRateKeyboard())
+    await sendBotMessage(ADMIN_CHAT_ID, `⚠️ Отправил сообщение с просьбой об отзыве клиенту ${getUserLink(user)}`)
 }
 
 const sendBonusForBadReview = async (ctx) => {
@@ -107,6 +108,6 @@ composer.command('review', async (ctx) => {
     if (!ADMIN_ARRAY.includes(ctx.from.username)) {
         return
     }
-    await sendReviewRateMessage(ctx.from.id)
+    await sendReviewRateMessage(ctx.from)
 })
 export default composer

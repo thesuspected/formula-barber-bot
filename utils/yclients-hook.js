@@ -13,6 +13,7 @@ import {
     setUserUsedServices,
     updateNoticeByRecordId,
 } from './helpers.js'
+import { sendReviewRateMessage } from '../composers/review.composer.js'
 
 app.post('/hook', async (req, res) => {
     const bodyLog = `----- Вебхук ${dayjs().format('DD MMMM YYYY, HH:mm')} -----\n`
@@ -22,8 +23,6 @@ app.post('/hook', async (req, res) => {
     const { status, resource, data } = req.body
     const { staff, client, date, id } = data
 
-    // TODO: Добавить проверку на существование record_id в barber-notices и обновление данных о записи (редактирование, удаление)
-    // resource: 'record',
     if (!client || !client.phone) {
         return
     }
@@ -79,7 +78,10 @@ app.post('/hook', async (req, res) => {
                     // Оповещаем юзера и админов о награждении за реферала
                     await noticeAboutRewardForReferral(rewardInfo, user)
                 }
-                // TODO: Добавить здесь логику опроса после посещения барбершопа
+                // Отправляем просьбу об отзыве через заданное время
+                setTimeout(() => {
+                    sendReviewRateMessage(user.id)
+                }, 60000)
                 break
             default:
                 const log = `Необрабатываемый вебхук, ресурс: ${resource}, статус : ${status}`
