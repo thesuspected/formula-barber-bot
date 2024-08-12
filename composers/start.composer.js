@@ -40,6 +40,7 @@ composer.use(async (ctx, next) => {
             last_balance: undefined,
             last_invited: undefined,
             admin_edited_user: undefined,
+            last_rate: undefined,
         }
     }
     // Get phone_number
@@ -79,9 +80,9 @@ const checkInvitedFromAccount = async (ctx) => {
     const id = message[1]
     // Если /start id
     if (command === '/start' && id) {
-        const user = await getUserById(id)
+        const { userData } = await getUserById(id)
         console.log(`Пользователь ${ctx.from.username} приглашен в бота от ${user.username ?? user.first_name}`)
-        return user
+        return userData
     }
     return undefined
 }

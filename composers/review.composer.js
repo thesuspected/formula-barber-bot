@@ -1,72 +1,76 @@
 import { Composer, Scenes } from 'telegraf'
 import {
     getAdminReviewMessage,
+    getHighRateMessage,
+    getLowRateMessage,
+    getLowRateMessageNextStep,
+    getMiddleRateMessage,
+    getMiddleRateMessageNextStep,
     getRateKeyboard,
+    getRateMessage,
     getReviewLinksKeyboard,
     REVIEW_SCORE,
     REVIEW_WIZARD_SCENE,
 } from './review.const.js'
 import { sendBotMessage } from '../barber.js'
+import { getUserById } from '../utils/helpers.js'
+import { ADMIN_ARRAY } from './admin.composer.js'
 
 const composer = new Composer()
 const { ADMIN_CHAT_ID } = process.env
 
+export const sendReviewRateMessage = async (user_id) => {
+    await sendBotMessage(user_id, getRateMessage(), getRateKeyboard())
+}
+
+const sendBonusForBadReview = async (ctx) => {
+    const BONUS_COUNT = 300
+    const { userRef, userData } = await getUserById(ctx.from.id)
+    if (!userData.isSendBadReviewBonus) {
+        await userRef.update({ balance: userData.balance + BONUS_COUNT, isSendBadReviewBonus: true })
+        return true
+    }
+    return false
+}
+
 const reviewWizardScene = new Scenes.WizardScene(
     REVIEW_WIZARD_SCENE,
-    // Начало сцены
+    // Отправляем сообщение в зависимости от оценки
     async (ctx) => {
-        ctx.wizard.state.review = {}
-        const message = await ctx.replyWithHTML(
-            `Спасибо, что доверяете нам свой образ! 💇 \nМы хотели бы узнать ваше мнение о нашем сервисе! 🧐 \n<blockquote>Пожалуйста, оцените последний визит в барбершоп от 1 до 5 🖐</blockquote>`,
-            getRateKeyboard()
-        )
-        ctx.wizard.state.review.message_id = message.message_id
-        return ctx.wizard.next()
-    },
-    // Получаем оценку
-    async (ctx) => {
-        if (!ctx.update?.callback_query) {
-            await ctx.replyWithHTML('Пожалуйста, нажмите одну из кнопок от 1 до 5 🖐')
-            return
-        }
-        await ctx.answerCbQuery()
-        const rate = ctx.update.callback_query.data
-        ctx.wizard.state.review.rate = rate
-        const rate_text = `<u><b>Вы поставили ${rate}</b></u>`
-        switch (rate) {
+        const rate = ctx.session.last_rate
+        ctx.wizard.state.review = { rate }
+        const rate_text = `<u><b>Вы поставили ${ctx.session.last_rate}</b></u>`
+        switch (ctx.session.last_rate) {
             // 4-5 баллов
             case REVIEW_SCORE.RATE_5:
             case REVIEW_SCORE.RATE_4:
-                await ctx.replyWithHTML(
-                    `${rate_text} \n\nБлагодарим вас за высокую оценку! 😊 \nМы будем признательны, если вы оставите отзыв о нас на одном из сервисов ниже 🙏 <blockquote>При следующем посещении покажите его администратору и получите 100 бонусных рублей за каждый отзыв 💸</blockquote>`,
-                    getReviewLinksKeyboard()
-                )
-                ctx.wizard.state.review = {}
-                await ctx.deleteMessage(ctx.wizard.state.review.message_id)
+                await ctx.replyWithHTML(getHighRateMessage(rate_text), {
+                    parse_mode: 'HTML',
+                    link_preview_options: {
+                        is_disabled: true,
+                    },
+                    ...getReviewLinksKeyboard(),
+                })
                 // Отправляем отзыв в админский чат
-                const admin_message = getAdminReviewMessage(ctx.from, ctx.session, rate)
-                await sendBotMessage(ADMIN_CHAT_ID, admin_message)
+                await sendBotMessage(ADMIN_CHAT_ID, getAdminReviewMessage(ctx.from, ctx.session, rate))
                 return ctx.scene.leave()
             // 3 балла
             case REVIEW_SCORE.RATE_3:
-                await ctx.replyWithHTML(
-                    `${rate_text} \n\nСпасибо за честную оценку! 🍀 \nПодскажите, как мы можем улучшить наш сервис? 🧐 \nЧто испортило вам впечатление? 😔`
-                )
-                ctx.wizard.state.review.message = `Благодарим за отзыв! 💬 \nМы обязательно учтем ваши пожелания, чтобы стать лучше! ⭐️`
+                await ctx.replyWithHTML(getMiddleRateMessage(rate_text))
+                ctx.wizard.state.review.message = getMiddleRateMessageNextStep()
                 break
             // 1-2 балла
             case REVIEW_SCORE.RATE_2:
             case REVIEW_SCORE.RATE_1:
-                await ctx.replyWithHTML(
-                    `${rate_text} \n\nСожалеем, что у вас возникли проблемы во время посещения барбершопа 😔 \nМы бы хотели разобраться в ситуации 🙏 <blockquote>Пожалуйста, напишите более подробную информацию о произошедшем:</blockquote>`
-                )
-                ctx.wizard.state.review.message = `Благодарим Вас за сообщение о возникшей проблеме 🙌 \nМы очень ценим ваше мнение, вся информация будет передана руководству. \n<blockquote>Мы начислили на ваш счет 300 бонусных рублей в качестве извинений за предоставленные неудобства 🥺</blockquote>`
+                await ctx.replyWithHTML(getLowRateMessage(rate_text))
+                // Начисляем бонусы за плохое впечатление, если раньше не оценивал также
+                const isBonusSend = await sendBonusForBadReview(ctx)
+                ctx.wizard.state.review.message = getLowRateMessageNextStep(isBonusSend)
                 break
             default:
-                await ctx.replyWithHTML('Пожалуйста, нажмите одну из кнопок от 1 до 5 🖐')
+                await ctx.replyWithHTML('Извините, произошла непредвиденная ошибка :(')
                 return
         }
-        await ctx.deleteMessage(ctx.wizard.state.review.message_id)
         return ctx.wizard.next()
     },
     async (ctx) => {
@@ -76,8 +80,10 @@ const reviewWizardScene = new Scenes.WizardScene(
         }
         const reason = ctx.message.text
         // Отправляем отзыв в админский чат
-        const admin_message = getAdminReviewMessage(ctx.from, ctx.session, ctx.wizard.state.review.rate, reason)
-        await sendBotMessage(ADMIN_CHAT_ID, admin_message)
+        await sendBotMessage(
+            ADMIN_CHAT_ID,
+            getAdminReviewMessage(ctx.from, ctx.session, ctx.wizard.state.review.rate, reason)
+        )
         // Сообщение клиенту
         await ctx.replyWithHTML(ctx.wizard.state.review.message)
         ctx.wizard.state.review = {}
@@ -87,7 +93,20 @@ const reviewWizardScene = new Scenes.WizardScene(
 const stage = new Scenes.Stage([reviewWizardScene])
 composer.use(stage.middleware())
 
+composer.action(
+    [REVIEW_SCORE.RATE_1, REVIEW_SCORE.RATE_2, REVIEW_SCORE.RATE_3, REVIEW_SCORE.RATE_4, REVIEW_SCORE.RATE_5],
+    async (ctx) => {
+        ctx.session.last_rate = ctx.update.callback_query.data
+        await ctx.deleteMessage()
+        await ctx.scene.enter(REVIEW_WIZARD_SCENE)
+    }
+)
+
 composer.command('review', async (ctx) => {
-    await ctx.scene.enter(REVIEW_WIZARD_SCENE)
+    // Проверяем на админа
+    if (!ADMIN_ARRAY.includes(ctx.from.username)) {
+        return
+    }
+    await sendReviewRateMessage(ctx.from.id)
 })
 export default composer

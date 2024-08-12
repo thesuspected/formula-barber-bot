@@ -98,7 +98,8 @@ export const getUserLink = (user) => {
 
 export const getUserById = async (id) => {
     const userRef = db.collection('barber-users').doc(String(id))
-    return (await userRef.get()).data()
+    const userData = (await userRef.get()).data()
+    return { userRef, userData }
 }
 
 export const getUserByPhone = async (phone) => {
@@ -182,8 +183,7 @@ export const setUserUsedServices = async (user_id) => {
 }
 
 export const bonusRewardForReferral = async (id, referral) => {
-    const userData = await getUserById(id)
-    const userRef = db.collection('barber-users').doc(String(userData.id))
+    const { userRef, userData } = await getUserById(id)
 
     // Считаем номер успешного реферала
     const invite_number = userData.invited.reduce((count, invited_user) => {

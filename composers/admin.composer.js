@@ -7,7 +7,7 @@ import { sendBotMessage } from '../barber.js'
 const { ADMIN_CHAT_ID } = process.env
 
 const composer = new Composer()
-const ADMIN_ARRAY = ['zuspect', 'Smnv3798', 'Lissssa_27', 'formula_barber']
+export const ADMIN_ARRAY = ['zuspect', 'Smnv3798', 'Lissssa_27', 'formula_barber']
 const ADMIN_ACTIONS = {
     ADD_BONUS: '➕ Начислить',
     REMOVE_BONUS: '➖ Списать',
@@ -279,7 +279,6 @@ composer.action(ADMIN_ACTIONS.GO_BACK_CLIENT, (ctx) =>
 composer.command('user', async (ctx) => {
     // Проверяем на админа
     if (!ADMIN_ARRAY.includes(ctx.from.username)) {
-        ctx.replyWithHTML('Эта команда вам недоступна.')
         return
     }
     // Если не ввел payload
@@ -304,7 +303,6 @@ composer.command('user', async (ctx) => {
 composer.command('id', async (ctx) => {
     // Проверяем на админа
     if (!ADMIN_ARRAY.includes(ctx.from.username)) {
-        ctx.replyWithHTML('Эта команда вам недоступна.')
         return
     }
     // Если не ввел payload
@@ -312,10 +310,10 @@ composer.command('id', async (ctx) => {
         ctx.replyWithHTML('Введите команду в формате: <code>/id 1234567890</code>')
         return
     }
-    const user = await getUserById(ctx.payload)
-    ctx.session.admin_edited_user = user
-    if (user) {
-        ctx.replyWithHTML(getUserInfoMessage(user), {
+    const { userData } = await getUserById(ctx.payload)
+    ctx.session.admin_edited_user = userData
+    if (userData) {
+        ctx.replyWithHTML(getUserInfoMessage(userData), {
             link_preview_options: {
                 is_disabled: true,
             },
@@ -329,7 +327,6 @@ composer.command('id', async (ctx) => {
 composer.command('phone', async (ctx) => {
     // Проверяем на админа
     if (!ADMIN_ARRAY.includes(ctx.from.username)) {
-        ctx.replyWithHTML('Эта команда вам недоступна.')
         return
     }
     // Если не ввел payload

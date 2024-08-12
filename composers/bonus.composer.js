@@ -42,6 +42,9 @@ composer.action(BONUS.PAIR_HAIR_FROM_SCHEDULE, (ctx) => {
 composer.action(BONUS.BONUS_REVIEWS, (ctx) =>
     ctx.editMessageText(BONUS_TEXT.BONUS_REVIEWS, {
         parse_mode: 'HTML',
+        link_preview_options: {
+            is_disabled: true,
+        },
         ...getReviewsKeyboard(BONUS.BACK, BONUS.BACK),
     })
 )
