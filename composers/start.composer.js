@@ -7,7 +7,7 @@ import { getUserById, getUserLink } from '../utils/helpers.js'
 import axios from 'axios'
 
 const composer = new Composer()
-const { ADMIN_CHAT_ID, YCLIENTS_AUTH } = process.env
+const { ADMIN_CHAT_ID, DEBUG_CHAT_ID, YCLIENTS_AUTH } = process.env
 
 // Session Middleware
 composer.use(session())
@@ -22,6 +22,9 @@ composer.use(async (ctx, next) => {
     }
     if (ctx.update?.callback_query) {
         text = ctx.update.callback_query.data
+    }
+    if (text === 'Неизвестная команда') {
+        await sendBotMessage(DEBUG_CHAT_ID, ctx)
     }
     const log = `${getUserLink(ctx.from)}: ${text}`
     console.log(log, `(chat_id: ${ctx.chat.id})`)
