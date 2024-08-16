@@ -61,7 +61,14 @@ composer.use(async (ctx, next) => {
         if (isUserExist) {
             ctx.session.auth = true
         } else {
-            ctx.session.invited_from = await checkInvitedFromAccount(ctx)
+            const ref = await checkInvitedFromAccount(ctx)
+            if (ref === 'ref_error') {
+                await ctx.replyWithHTML(
+                    'Извините, реферальная ссылка недействительна 😔 \nЗапросите актуальную ссылку или введите команду /start для регистрации без приглашения 🙌'
+                )
+                return
+            }
+            ctx.session.invited_from = ref
             await ctx.replyWithHTML(getPhoneMessage(ctx.from.first_name, ctx.session.invited_from), {
                 link_preview_options: {
                     is_disabled: true,
@@ -84,8 +91,13 @@ const checkInvitedFromAccount = async (ctx) => {
     // Если /start id
     if (command === '/start' && id) {
         const { userData } = await getUserById(id)
-        console.log(`Пользователь ${ctx.from.username} приглашен в бота от ${userData.username ?? userData.first_name}`)
-        return userData
+        if (userData) {
+            console.log(
+                `Пользователь ${ctx.from.username} приглашен в бота от ${userData.username ?? userData.first_name}`
+            )
+            return userData
+        }
+        return 'ref_error'
     }
     return undefined
 }
