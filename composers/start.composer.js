@@ -84,7 +84,7 @@ const checkInvitedFromAccount = async (ctx) => {
     // Если /start id
     if (command === '/start' && id) {
         const { userData } = await getUserById(id)
-        console.log(`Пользователь ${ctx.from.username} приглашен в бота от ${user.username ?? user.first_name}`)
+        console.log(`Пользователь ${ctx.from.username} приглашен в бота от ${userData.username ?? userData.first_name}`)
         return userData
     }
     return undefined
