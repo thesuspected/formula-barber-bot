@@ -14,8 +14,23 @@ import {
     updateNoticeByRecordId,
 } from './helpers.js'
 import { sendReviewRateMessage } from '../composers/review.composer.js'
+import { exec } from 'child_process'
 
 app.get('/reload-formula', async (req, res) => {
+    console.log('Вебхук перезапуска')
+    try {
+        exec(`pm2 reload barber`, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`exec error: ${error}`)
+                return
+            }
+            console.log(`stdout = ${stdout}`)
+            console.log(`stderr = ${stderr}`)
+        })
+    } catch (error) {
+        console.log(error)
+    }
+    console.log('Бот перезапущен')
     res.send('Бот перезапущен').status(200).end()
 })
 
