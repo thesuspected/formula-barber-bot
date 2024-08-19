@@ -15,6 +15,10 @@ import {
 } from './helpers.js'
 import { sendReviewRateMessage } from '../composers/review.composer.js'
 
+app.get('/reload-formula', async (req, res) => {
+    res.send('Бот перезапущен').status(200).end()
+})
+
 app.post('/hook', async (req, res) => {
     const bodyLog = `----- Вебхук ${dayjs().format('DD MMMM YYYY, HH:mm')} -----\n`
     console.log(bodyLog, req.body)
