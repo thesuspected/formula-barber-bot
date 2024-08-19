@@ -10,6 +10,19 @@ import dayjs from 'dayjs'
 const composer = new Composer()
 const { ADMIN_CHAT_ID, YCLIENTS_AUTH } = process.env
 
+const handleUnknownCommand = async (ctx) => {
+    const timeLog = `----- Неизвестная команда ${dayjs().format('DD MMMM YYYY, HH:mm')} -----\n`
+    console.log(timeLog, ctx.update)
+    // Отправляем сtx в DEBUG
+    await sendDebugMessage(timeLog, ctx.update)
+    // Отправялем админам
+    const oldStatus = ctx.update.my_chat_member.old_chat_member.status
+    const newStatus = ctx.update.my_chat_member.new_chat_member.status
+    const statusText = newStatus === 'member' ? '🔄 Перезапустил' : '⛔️ Заблокировал'
+
+    return `${statusText} бота, сменив статус с <code>${oldStatus}</code> на <code>${newStatus}</code>`
+}
+
 // Session Middleware
 composer.use(session())
 // Logger Middleware
@@ -25,9 +38,7 @@ composer.use(async (ctx, next) => {
         text = ctx.update.callback_query.data
     }
     if (text === 'Неизвестная команда') {
-        const timeLog = `----- Неизвестная команда ${dayjs().format('DD MMMM YYYY, HH:mm')} -----\n`
-        console.log(timeLog, ctx)
-        await sendDebugMessage(timeLog, ctx)
+        text = await handleUnknownCommand(ctx)
     }
     const log = `${getUserLink(ctx.from)}: ${text}`
     console.log(log, `(chat_id: ${ctx.chat.id})`)
