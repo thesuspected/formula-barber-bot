@@ -80,7 +80,7 @@ app.post('/hook', async (req, res) => {
                 }
                 // Отправляем просьбу об отзыве через заданное время
                 setTimeout(() => {
-                    sendReviewRateMessage(user.id)
+                    sendReviewRateMessage(user)
                 }, 60000)
                 break
             default:

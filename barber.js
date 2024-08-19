@@ -52,13 +52,17 @@ bot.hears(CMD.SCHEDULE, (ctx) => {
 })
 
 export async function sendBotMessage(chatId, text, extra) {
-    await bot.telegram.sendMessage(chatId, text, {
-        parse_mode: 'HTML',
-        link_preview_options: {
-            is_disabled: true,
-        },
-        ...extra,
-    })
+    try {
+        await bot.telegram.sendMessage(chatId, text, {
+            parse_mode: 'HTML',
+            link_preview_options: {
+                is_disabled: true,
+            },
+            ...extra,
+        })
+    } catch (e) {
+        console.error(`Ошибка при отправке сообщения: ${text}`)
+    }
 }
 
 bot.launch()
