@@ -3,6 +3,7 @@ import { db } from '../config/firebase.js'
 import { sendBotMessage } from '../barber.js'
 import { getEntryBeforeHourNotice } from './messages.js'
 import dayjs from 'dayjs'
+import { getUserById, getUserLink } from './helpers.js'
 
 const { ADMIN_CHAT_ID } = process.env
 const CRON_INTERVAL = 15 // Интервал в минутах
@@ -42,13 +43,16 @@ const launchNoticeCron = async () => {
 
         // Если меньше N часов до записи, отправялем уведомление
         if (hoursDiff < 1.6) {
-            const timeString = noticeDatetime.format('HH:mm')
-            const noticeLog = `Отправил напоминание о записи для <b>${user_name}</b> на <b>${timeString}</b>`
-            console.log(noticeLog)
-            sendBotMessage(user_id, getEntryBeforeHourNotice(user_name, staff_name, timeString))
-            sendBotMessage(ADMIN_CHAT_ID, noticeLog)
-            // Удаляем отправленное уведомление из бд
-            noticesCollection.doc(notice.id).delete()
+            getUserById(user_id).then((user) => {
+                const { userData } = user
+                const timeString = noticeDatetime.format('HH:mm')
+                const noticeLog = `Отправил напоминание о записи для <b>${getUserLink(userData)}</b> на <b>${timeString}</b>`
+                console.log(noticeLog)
+                sendBotMessage(user_id, getEntryBeforeHourNotice(user_name, staff_name, timeString))
+                sendBotMessage(ADMIN_CHAT_ID, noticeLog)
+                // Удаляем отправленное уведомление из бд
+                noticesCollection.doc(notice.id).delete()
+            })
         } else {
             console.log(`Рано для отправки ${user_name}, время записи ${noticeDatetime.format('HH:mm')}`)
         }
