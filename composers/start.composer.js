@@ -3,11 +3,12 @@ import { getPhoneMessage, getPhonePleasureMessage, getStartMessage } from '../he
 import { getMainKeyboard, getPhoneKeyboard } from '../keyboards.js'
 import { db } from '../config/firebase.js'
 import { sendBotMessage } from '../barber.js'
-import { getUserById, getUserLink } from '../utils/helpers.js'
+import { getUserById, getUserLink, sendDebugMessage } from '../utils/helpers.js'
 import axios from 'axios'
+import dayjs from 'dayjs'
 
 const composer = new Composer()
-const { ADMIN_CHAT_ID, DEBUG_CHAT_ID, YCLIENTS_AUTH } = process.env
+const { ADMIN_CHAT_ID, YCLIENTS_AUTH } = process.env
 
 // Session Middleware
 composer.use(session())
@@ -24,7 +25,9 @@ composer.use(async (ctx, next) => {
         text = ctx.update.callback_query.data
     }
     if (text === 'Неизвестная команда') {
-        await sendBotMessage(DEBUG_CHAT_ID, ctx)
+        const timeLog = `----- Неизвестная команда ${dayjs().format('DD MMMM YYYY, HH:mm')} -----\n`
+        console.log(timeLog, ctx)
+        await sendDebugMessage(timeLog, ctx)
     }
     const log = `${getUserLink(ctx.from)}: ${text}`
     console.log(log, `(chat_id: ${ctx.chat.id})`)
