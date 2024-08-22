@@ -15,12 +15,15 @@ const handleUnknownCommand = async (ctx) => {
     console.log(timeLog, ctx.update)
     // Отправляем сtx в DEBUG
     await sendDebugMessage(timeLog, ctx.update)
-    // Отправялем админам
+    // Отправляем админам
     const oldStatus = ctx.update.my_chat_member.old_chat_member.status
     const newStatus = ctx.update.my_chat_member.new_chat_member.status
     const statusText = newStatus === 'member' ? '🔄 Перезапустил' : '⛔️ Заблокировал'
 
-    return `${statusText} бота, сменив статус с <code>${oldStatus}</code> на <code>${newStatus}</code>`
+    return {
+        text: `${statusText} бота, сменив статус с <code>${oldStatus}</code> на <code>${newStatus}</code>`,
+        isError: newStatus !== 'member',
+    }
 }
 
 // Session Middleware
@@ -28,6 +31,7 @@ composer.use(session())
 // Logger Middleware
 composer.use(async (ctx, next) => {
     let text = 'Неизвестная команда'
+    let isError = false
     if (ctx.message?.text) {
         text = ctx.message.text
     }
@@ -38,11 +42,17 @@ composer.use(async (ctx, next) => {
         text = ctx.update.callback_query.data
     }
     if (text === 'Неизвестная команда') {
-        text = await handleUnknownCommand(ctx)
+        const res = await handleUnknownCommand(ctx)
+        isError = res.isError
+        text = res.text
     }
     const log = `${getUserLink(ctx.from)}: ${text}`
     console.log(log, `(chat_id: ${ctx.chat.id})`)
     await sendBotMessage(ADMIN_CHAT_ID, log)
+    // Если словили ошибку, дальше не идем
+    if (isError) {
+        return
+    }
     // console.log(ctx) // uncomment for log ctx
     await next()
 })
