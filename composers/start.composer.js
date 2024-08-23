@@ -12,17 +12,24 @@ const { ADMIN_CHAT_ID, YCLIENTS_AUTH } = process.env
 
 const handleUnknownCommand = async (ctx) => {
     const timeLog = `----- Неизвестная команда ${dayjs().format('DD MMMM YYYY, HH:mm')} -----\n`
-    console.log(timeLog, ctx.update)
+    console.log(timeLog, { update: ctx.update, message: ctx.message })
     // Отправляем сtx в DEBUG
-    await sendDebugMessage(timeLog, ctx.update)
-    // Отправляем админам
-    const oldStatus = ctx.update.my_chat_member.old_chat_member.status
-    const newStatus = ctx.update.my_chat_member.new_chat_member.status
-    const statusText = newStatus === 'member' ? '🔄 Перезапустил' : '⛔️ Заблокировал'
+    await sendDebugMessage(timeLog, { update: ctx.update, message: ctx.message })
+    // Если команда блокировки или перезапуска
+    if (ctx.update?.my_chat_member?.old_chat_member) {
+        const oldStatus = ctx.update.my_chat_member.old_chat_member.status
+        const newStatus = ctx.update.my_chat_member.new_chat_member.status
+        const statusText = newStatus === 'member' ? '🔄 Перезапустил' : '⛔️ Заблокировал'
 
+        return {
+            text: `${statusText} бота, сменив статус с <code>${oldStatus}</code> на <code>${newStatus}</code>`,
+            isError: newStatus !== 'member',
+        }
+    }
+    // Другая команда
     return {
-        text: `${statusText} бота, сменив статус с <code>${oldStatus}</code> на <code>${newStatus}</code>`,
-        isError: newStatus !== 'member',
+        text: 'Неизвестная команда (отправил в отладку)',
+        isError: false,
     }
 }
 
