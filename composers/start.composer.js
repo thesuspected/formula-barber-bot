@@ -132,7 +132,7 @@ const checkInvitedFromAccount = async (ctx) => {
             }
         } else {
             // TODO: Убрать костыль, сделать логику рефок
-            if (payload === 'СГЮА') {
+            if (payload === 'ssla64') {
                 return {
                     id: 'ssla64',
                     username: 'ssla64',
