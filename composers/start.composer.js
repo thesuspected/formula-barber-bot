@@ -136,6 +136,7 @@ const checkInvitedFromAccount = async (ctx) => {
                 return {
                     id: 'СГЮА',
                     first_name: 'СГЮА',
+                    is_special_ref: true,
                 }
             }
         }
@@ -259,12 +260,15 @@ const writeNewUser = async (ctx) => {
     // Если приглашен кем-то, добавляем инфу об этом
     if (ctx.session.invited_from) {
         const user = ctx.session.invited_from
-        // Если уже есть в базе yclients, оповещаем
-        if (isRegisteredYclients) {
-            await sendBotMessage(user.id, getReferralFromYclientsMessage(ctx))
-        } else {
-            await pushUserToInvitedArray(user, ctx.from)
-            await sendBotMessage(user.id, getNewReferralUserMessage(ctx))
+        // Если не особый код (СГЮА и тд)
+        if (!user.is_special_ref) {
+            // Если уже есть в базе yclients, оповещаем
+            if (isRegisteredYclients) {
+                await sendBotMessage(user.id, getReferralFromYclientsMessage(ctx))
+            } else {
+                await pushUserToInvitedArray(user, ctx.from)
+                await sendBotMessage(user.id, getNewReferralUserMessage(ctx))
+            }
         }
     }
 
