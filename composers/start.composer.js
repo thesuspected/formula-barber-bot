@@ -134,8 +134,9 @@ const checkInvitedFromAccount = async (ctx) => {
             // TODO: Убрать костыль, сделать логику рефок
             if (payload === 'СГЮА') {
                 return {
-                    id: 'СГЮА',
-                    first_name: 'СГЮА',
+                    id: 'ssla64',
+                    username: 'ssla64',
+                    first_name: 'ssla64',
                     is_special_ref: true,
                 }
             }
