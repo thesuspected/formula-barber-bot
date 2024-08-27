@@ -118,15 +118,26 @@ const checkInvitedFromAccount = async (ctx) => {
     }
     const message = ctx.message.text.split(' ')
     const command = message[0]
-    const id = message[1]
-    // Если /start id
-    if (command === '/start' && id) {
-        const { userData } = await getUserById(id)
-        if (userData) {
-            console.log(
-                `Пользователь ${ctx.from.username} приглашен в бота от ${userData.username ?? userData.first_name}`
-            )
-            return userData
+    const payload = message[1]
+    // Если /start payload
+    if (command === '/start') {
+        // Если payload == 1234567890
+        if (!isNaN(parseFloat(payload))) {
+            const { userData } = await getUserById(payload)
+            if (userData) {
+                console.log(
+                    `Пользователь ${ctx.from.username} приглашен в бота от ${userData.username ?? userData.first_name}`
+                )
+                return userData
+            }
+        } else {
+            // TODO: Убрать костыль, сделать логику рефок
+            if (payload === 'СГЮА') {
+                return {
+                    id: 'СГЮА',
+                    first_name: 'СГЮА',
+                }
+            }
         }
         return 'ref_error'
     }
