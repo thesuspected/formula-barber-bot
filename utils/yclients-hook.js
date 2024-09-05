@@ -7,9 +7,11 @@ import {
     getUserByClientPhone,
     noticeAboutDeleteEntry,
     noticeAboutNewEntry,
+    noticeAboutPayServicesByUser,
     noticeAboutRewardForReferral,
     noticeAboutUpdateEntry,
     sendDebugMessage,
+    setUserSendReview,
     setUserUsedServices,
     updateNoticeByRecordId,
 } from './helpers.js'
@@ -97,10 +99,17 @@ app.post('/hook', async (req, res) => {
                     // Оповещаем юзера и админов о награждении за реферала
                     await noticeAboutRewardForReferral(rewardInfo, user)
                 }
-                // Отправляем просьбу об отзыве через заданное время
-                setTimeout(() => {
-                    sendReviewRateMessage(user)
-                }, 60000)
+                // Отправка просьбы об отзыве
+                if (!user.send_review) {
+                    const waitingMs = 600000
+                    const waitingMin = waitingMs / 60000
+                    await setUserSendReview(user.id)
+                    await noticeAboutPayServicesByUser(user, waitingMin)
+                    // Отправляем просьбу об отзыве через заданное время
+                    setTimeout(() => {
+                        sendReviewRateMessage(user)
+                    }, waitingMs)
+                }
                 break
             default:
                 const log = `Необрабатываемый вебхук, ресурс: ${resource}, статус : ${status}`

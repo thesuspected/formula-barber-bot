@@ -54,6 +54,16 @@ export const addNewEntryToNoticesCron = async (record_id, user, staff, date) => 
     })
 }
 
+export const noticeAboutPayServicesByUser = async (user, waitingMin) => {
+    const log = `💸 Клиент ${getUserLink(user)} оплатил услуги, через ${waitingMin} минут запрошу отзыв`
+    console.log(log)
+    await sendBotMessage(ADMIN_CHAT_ID, log)
+}
+
+export const setUserSendReview = async (user_id) => {
+    return await db.collection('barber-users').doc(String(user_id)).update({ send_review: true })
+}
+
 export const getUserByClientPhone = async (phoneNumber, client) => {
     console.log('getUserByClientPhone client =', client)
     try {
