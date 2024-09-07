@@ -121,6 +121,9 @@ const checkInvitedFromAccount = async (ctx) => {
     const payload = message[1]
     // Если /start payload
     if (command === '/start') {
+        if (!payload) {
+            return undefined
+        }
         // Если payload == 1234567890
         if (!isNaN(parseFloat(payload))) {
             const { userData } = await getUserById(payload)
