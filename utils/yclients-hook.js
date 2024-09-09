@@ -42,7 +42,7 @@ app.post('/hook', async (req, res) => {
     await sendDebugMessage(bodyLog, req.body)
 
     const { status, resource, data } = req.body
-    const { staff, client, date, id } = data
+    const { staff, client, date, id, sold_item_id } = data
 
     if (!client || !client.phone) {
         return
@@ -99,8 +99,9 @@ app.post('/hook', async (req, res) => {
                     // Оповещаем юзера и админов о награждении за реферала
                     await noticeAboutRewardForReferral(rewardInfo, user)
                 }
-                // Отправка просьбы об отзыве
-                if (!user.send_review) {
+                // Отправка просьбы об отзыве и операция соответствует отслеживаемой (id)
+                const haircutId = 15803024
+                if (!user.send_review && sold_item_id === haircutId) {
                     const waitingMs = 600000
                     const waitingMin = waitingMs / 60000
                     await setUserSendReview(user.id)
