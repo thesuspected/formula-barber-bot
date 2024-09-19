@@ -60,8 +60,10 @@ export async function sendBotMessage(chatId, text, extra) {
             },
             ...extra,
         })
+        return true
     } catch (e) {
-        console.error(`Ошибка: ${e}. При отправке сообщения: ${text}`)
+        console.error(`Ошибка: ${e}. При отправке сообщения: ${text}. chat_id: ${chatId}`)
+        return false
     }
 }
 

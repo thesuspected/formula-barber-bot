@@ -279,6 +279,9 @@ composer.action(ADMIN_ACTIONS.GO_BACK_CLIENT, (ctx) =>
 composer.command('user', async (ctx) => {
     // Проверяем на админа
     if (!ADMIN_ARRAY.includes(ctx.from.username)) {
+        const errLog = `⛔️ Пользователь ${getUserLink(ctx.from)} попытался отправить команду /user, не имея прав на это`
+        console.log(errLog)
+        await sendBotMessage(ADMIN_CHAT_ID, errLog)
         return
     }
     // Если не ввел payload
@@ -303,6 +306,9 @@ composer.command('user', async (ctx) => {
 composer.command('id', async (ctx) => {
     // Проверяем на админа
     if (!ADMIN_ARRAY.includes(ctx.from.username)) {
+        const errLog = `⛔️ Пользователь ${getUserLink(ctx.from)} попытался отправить команду /id, не имея прав на это`
+        console.log(errLog)
+        await sendBotMessage(ADMIN_CHAT_ID, errLog)
         return
     }
     // Если не ввел payload
@@ -327,6 +333,9 @@ composer.command('id', async (ctx) => {
 composer.command('phone', async (ctx) => {
     // Проверяем на админа
     if (!ADMIN_ARRAY.includes(ctx.from.username)) {
+        const errLog = `⛔️ Пользователь ${getUserLink(ctx.from)} попытался отправить команду /phone, не имея прав на это`
+        console.log(errLog)
+        await sendBotMessage(ADMIN_CHAT_ID, errLog)
         return
     }
     // Если не ввел payload
@@ -346,6 +355,53 @@ composer.command('phone', async (ctx) => {
     } else {
         ctx.replyWithHTML(`Клиент с номером телефона "${ctx.payload}" не найден`)
     }
+})
+
+const getAllUsers = async () => {
+    const citiesRef = db.collection('barber-users')
+    const snapshot = await citiesRef.get()
+    if (snapshot.empty) {
+        console.log('No matching documents.')
+        return
+    }
+    const users = []
+    snapshot.forEach((doc) => {
+        users.push(doc.data())
+    })
+    return users
+}
+
+composer.command('push', async (ctx) => {
+    // Проверяем на админа
+    if (!ADMIN_ARRAY.includes(ctx.from.username)) {
+        const errLog = `⛔️ Пользователь ${getUserLink(ctx.from)} попытался отправить команду /push, не имея прав на это`
+        console.log(errLog)
+        await sendBotMessage(ADMIN_CHAT_ID, errLog)
+        return
+    }
+    // Если не ввел payload
+    if (!ctx.payload) {
+        ctx.replyWithHTML('Введите команду в формате: <code>/push Отправляемое сообщение</code>')
+        return
+    }
+
+    const users = await getAllUsers()
+
+    const adminLog = `💬👥 Отправляю рассылку <b>${users.length}</b> пользователям с сообщением:\n<blockquote>${ctx.payload}</blockquote>`
+    console.log(adminLog)
+    await sendBotMessage(ADMIN_CHAT_ID, adminLog)
+
+    const errorUsers = []
+    for (const user of users) {
+        const log = `Отправляю сообщение для @${user.username ?? user.first_name} (${user.id})`
+        console.log(log)
+
+        const ok = await sendBotMessage(user.id, ctx.payload)
+        if (!ok) {
+            errorUsers.push(user)
+        }
+    }
+    console.log('errorUsers', errorUsers)
 })
 
 export default composer
