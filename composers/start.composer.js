@@ -2,7 +2,7 @@ import { Composer, session } from 'telegraf'
 import { getPhoneMessage, getPhonePleasureMessage, getStartMessage } from '../helpers.js'
 import { getMainKeyboard, getPhoneKeyboard } from '../keyboards.js'
 import { db } from '../config/firebase.js'
-import { sendBotMessage } from '../barber.js'
+import { sendBotMessage, tryCatchWrapper } from '../barber.js'
 import { getUserById, getUserLink, sendDebugMessage } from '../utils/helpers.js'
 import axios from 'axios'
 import dayjs from 'dayjs'
@@ -80,12 +80,14 @@ composer.use(async (ctx, next) => {
     // Get phone_number
     if (ctx.message && ctx.message.contact) {
         await writeNewUser(ctx)
-        await ctx.replyWithHTML(getPhonePleasureMessage(ctx), {
-            link_preview_options: {
-                is_disabled: true,
-            },
-            ...getMainKeyboard(),
-        })
+        await tryCatchWrapper(
+            ctx.replyWithHTML(getPhonePleasureMessage(ctx), {
+                link_preview_options: {
+                    is_disabled: true,
+                },
+                ...getMainKeyboard(),
+            })
+        )
     }
     if (!ctx.session.auth) {
         const isUserExist = await checkUserAuth(ctx)
@@ -94,18 +96,22 @@ composer.use(async (ctx, next) => {
         } else {
             const ref = await checkInvitedFromAccount(ctx)
             if (ref === 'ref_error') {
-                await ctx.replyWithHTML(
-                    'Извините, реферальная ссылка недействительна 😔 \nЗапросите актуальную ссылку или введите команду /start для регистрации без приглашения 🙌'
+                await tryCatchWrapper(
+                    ctx.replyWithHTML(
+                        'Извините, реферальная ссылка недействительна 😔 \nЗапросите актуальную ссылку или введите команду /start для регистрации без приглашения 🙌'
+                    )
                 )
                 return
             }
             ctx.session.invited_from = ref
-            await ctx.replyWithHTML(getPhoneMessage(ctx.from.first_name, ctx.session.invited_from), {
-                link_preview_options: {
-                    is_disabled: true,
-                },
-                ...getPhoneKeyboard(),
-            })
+            await tryCatchWrapper(
+                ctx.replyWithHTML(getPhoneMessage(ctx.from.first_name, ctx.session.invited_from), {
+                    link_preview_options: {
+                        is_disabled: true,
+                    },
+                    ...getPhoneKeyboard(),
+                })
+            )
             return
         }
     }
@@ -291,12 +297,14 @@ composer.start(async (ctx) => {
         // TODO: Добавить проверку на привязку к аккаунту пригласившему этот
         console.log(`${ctx.from.username} перешел по приглашению от ${ctx.payload}`)
     }
-    ctx.replyWithHTML(getStartMessage(ctx.from.first_name), {
-        link_preview_options: {
-            is_disabled: true,
-        },
-        ...getMainKeyboard(),
-    })
+    await tryCatchWrapper(
+        ctx.replyWithHTML(getStartMessage(ctx.from.first_name), {
+            link_preview_options: {
+                is_disabled: true,
+            },
+            ...getMainKeyboard(),
+        })
+    )
 })
 
 export default composer

@@ -12,6 +12,7 @@ import AdminComposer from './composers/admin.composer.js'
 import ReviewComposer from './composers/review.composer.js'
 import './utils/cron-ping.js'
 import './utils/yclients-hook.js'
+import { sendDebugMessage } from './utils/helpers.js'
 
 const { BOT_TOKEN } = process.env
 const bot = new Telegraf(BOT_TOKEN)
@@ -51,6 +52,7 @@ bot.hears(CMD.SCHEDULE, (ctx) => {
     )
 })
 
+// Send message
 export async function sendBotMessage(chatId, text, extra) {
     try {
         await bot.telegram.sendMessage(chatId, text, {
@@ -64,6 +66,16 @@ export async function sendBotMessage(chatId, text, extra) {
     } catch (e) {
         console.error(`Ошибка: ${e}. При отправке сообщения: ${text}. chat_id: ${chatId}`)
         return false
+    }
+}
+
+// Try Catch
+export async function tryCatchWrapper(fn) {
+    try {
+        await fn
+    } catch (e) {
+        await sendDebugMessage('Ошибка: ', e)
+        console.error(`Ошибка: ${e}`)
     }
 }
 

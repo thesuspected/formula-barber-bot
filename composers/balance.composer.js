@@ -3,6 +3,7 @@ import { Composer, Markup } from 'telegraf'
 import { CMD } from '../const.js'
 import _ from 'lodash'
 import { getUserLink } from '../utils/helpers.js'
+import { tryCatchWrapper } from '../barber.js'
 
 const composer = new Composer()
 
@@ -49,13 +50,13 @@ composer.hears(CMD.BALANCE, async (ctx) => {
     const user = await getUserData(ctx)
     ctx.session.last_balance = user.balance
     ctx.session.last_invited = user.invited
-    ctx.replyWithHTML(getBalanceReply(user), getBalanceKeyboard())
+    await tryCatchWrapper(ctx.replyWithHTML(getBalanceReply(user), getBalanceKeyboard()))
 })
 composer.command('balance', async (ctx) => {
     const user = await getUserData(ctx)
     ctx.session.last_balance = user.balance
     ctx.session.last_invited = user.invited
-    ctx.replyWithHTML(getBalanceReply(user), getBalanceKeyboard())
+    await tryCatchWrapper(ctx.replyWithHTML(getBalanceReply(user), getBalanceKeyboard()))
 })
 composer.action(BALANCE_REFRESH, async (ctx) => {
     const user = await getUserData(ctx)
@@ -66,10 +67,12 @@ composer.action(BALANCE_REFRESH, async (ctx) => {
         last_invited &&
         (!_.isEqual(last_balance, user.balance) || !_.isEqual(last_invited, user.invited))
     ) {
-        ctx.editMessageText(getBalanceReply(user), {
-            parse_mode: 'HTML',
-            ...getBalanceKeyboard(),
-        })
+        await tryCatchWrapper(
+            ctx.editMessageText(getBalanceReply(user), {
+                parse_mode: 'HTML',
+                ...getBalanceKeyboard(),
+            })
+        )
     }
     ctx.session.last_balance = user.balance
     ctx.session.last_invited = user.invited
