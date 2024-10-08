@@ -100,7 +100,7 @@ composer.action(
     [REVIEW_SCORE.RATE_1, REVIEW_SCORE.RATE_2, REVIEW_SCORE.RATE_3, REVIEW_SCORE.RATE_4, REVIEW_SCORE.RATE_5],
     async (ctx) => {
         ctx.session.last_rate = ctx.update.callback_query.data
-        await ctx.deleteMessage()
+        await tryCatchWrapper(ctx.deleteMessage())
         await ctx.scene.enter(REVIEW_WIZARD_SCENE)
     }
 )
