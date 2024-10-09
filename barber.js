@@ -3,7 +3,7 @@ import './config/dayjs.js'
 import { Telegraf } from 'telegraf'
 import { getAddressKeyboard, getSheduleKeyboard } from './keyboards.js'
 import { CMD } from './const.js'
-import { getAddressMessage, getSheduleMessage } from './helpers.js'
+import { getAddressMessage, getSheduleMessage, getUnknownText } from './helpers.js'
 import StartComposer from './composers/start.composer.js'
 import BonusComposer from './composers/bonus.composer.js'
 import BalanceComposer from './composers/balance.composer.js'
@@ -51,6 +51,15 @@ bot.hears(CMD.SCHEDULE, (ctx) => {
         }
     )
 })
+// Обработка неизвестных запросов
+bot.hears(/.+/, (ctx) =>
+    ctx.replyWithHTML(getUnknownText(), {
+        parse_mode: 'HTML',
+        link_preview_options: {
+            is_disabled: true,
+        },
+    })
+)
 
 // Send message
 export async function sendBotMessage(chatId, text, extra) {
