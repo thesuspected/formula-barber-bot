@@ -9,6 +9,7 @@ export const BONUS = {
     BACK: '⬅️ Назад к акциям',
     INVITE_FRIEND_FROM_SCHEDULE: '🤝🏻 Пригласи друга 📅',
     PAIR_HAIR_FROM_SCHEDULE: '💇🏼💇🏽 Парная стрижка 📅',
+    MEETING_THE_MASTER: '👋 Знакомство с мастером',
 }
 export const BONUS_REVIEW = {
     YANDEX: '🔴 Яндекс Карты',
@@ -40,6 +41,13 @@ export const BONUS_TEXT = {
 
 Мы отреагируем на отметку и свяжемся с тобой, чтобы зафиксировать скидку 💸
 За каждую отметку начисляем 50 бонусных рублей 💰`,
+
+    MEETING_THE_MASTER: `<u><b>${BONUS.MEETING_THE_MASTER}</b></u>
+
+Акция на стрижку у молодого мастера ✂️
+<s>1000 ₽</s> <b>700 ₽</b> — Скидка 30%!
+
+<blockquote>Записывайтесь по кнопке внизу ⬇️</blockquote>`,
 }
 
 export const getBonusMessage = () =>
@@ -76,6 +84,7 @@ export const getBonusKeyboard = () => {
             Markup.button.callback(BONUS.BONUS_REVIEWS, BONUS.BONUS_REVIEWS),
             Markup.button.callback(BONUS.BONUS_REFERENCES, BONUS.BONUS_REFERENCES),
         ],
+        [Markup.button.callback(BONUS.MEETING_THE_MASTER, BONUS.MEETING_THE_MASTER)],
     ]).resize()
 }
 

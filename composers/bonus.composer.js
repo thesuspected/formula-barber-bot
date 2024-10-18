@@ -70,6 +70,17 @@ composer.action(BONUS.BONUS_REFERENCES, (ctx) =>
         })
     )
 )
+composer.action(BONUS.MEETING_THE_MASTER, (ctx) =>
+    tryCatchWrapper(
+        ctx.editMessageText(BONUS_TEXT.MEETING_THE_MASTER, {
+            parse_mode: 'HTML',
+            link_preview_options: {
+                is_disabled: true,
+            },
+            ...getBackKeyboard(BONUS.BACK, BONUS.BACK),
+        })
+    )
+)
 composer.action(BONUS.BACK, async (ctx) =>
     tryCatchWrapper(
         ctx.editMessageText(getBonusMessage(), {
