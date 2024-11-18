@@ -10,6 +10,7 @@ import {
     noticeAboutPayServicesByUser,
     noticeAboutRewardForReferral,
     noticeAboutUpdateEntry,
+    sendDebugMessage,
     setUserSendReview,
     setUserUsedServices,
     updateNoticeByRecordId,
@@ -38,7 +39,7 @@ app.get('/reload-formula', async (req, res) => {
 app.post('/hook', async (req, res) => {
     const bodyLog = `----- Вебхук ${dayjs().format('DD MMMM YYYY, HH:mm')} -----\n`
     console.log(bodyLog, req.body)
-    // await sendDebugMessage(bodyLog, req.body) off webhook debug messages
+    await sendDebugMessage(bodyLog, req.body)
 
     const { status, resource, data } = req.body
     const { staff, client, date, id, sold_item_id } = data
