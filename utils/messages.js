@@ -15,6 +15,11 @@ export const getDeleteEntryUserMessage = (user, staff, date) => {
 Будем ждать тебя снова! 🏎`
 }
 
+export const getEntryBeforeDayNotice = (user_name, staff_name, time) => {
+    return `${user_name}, спешим напомнить! 🏁
+Завтра тебя ждет Мастер <b>${staff_name}</b> к ${time} в Формуле! 🏎`
+}
+
 export const getEntryBeforeHourNotice = (user_name, staff_name, time) => {
     return `${user_name}, спешим напомнить! 🏁
 Мастер <b>${staff_name}</b> ждет тебя сегодня к ${time} в Формуле! 🏎`
