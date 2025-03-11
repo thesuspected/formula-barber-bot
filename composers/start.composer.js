@@ -141,13 +141,11 @@ const checkInvitedFromAccount = async (ctx) => {
             }
         } else {
             // TODO: Убрать костыль, сделать логику рефок
-            if (payload === 'ssla64') {
-                return {
-                    id: 'ssla64',
-                    username: 'ssla64',
-                    first_name: 'ssla64',
-                    is_special_ref: true,
-                }
+            return {
+                id: payload,
+                username: payload,
+                first_name: payload,
+                is_special_ref: true,
             }
         }
         return 'ref_error'
