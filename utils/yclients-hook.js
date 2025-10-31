@@ -21,7 +21,7 @@ import { exec } from 'child_process'
 app.get('/reload-formula', async (req, res) => {
     console.log('Вебхук перезапуска')
     try {
-        exec(`pm2 reload barber`, (error, stdout, stderr) => {
+        exec(`pm2 reload formula-barber`, (error, stdout, stderr) => {
             if (error) {
                 console.error(`exec error: ${error}`)
                 return
