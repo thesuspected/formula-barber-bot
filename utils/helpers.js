@@ -195,6 +195,30 @@ export const setUserUsedServices = async (user_id) => {
     return await db.collection('barber-users').doc(String(user_id)).update({ used_services: true })
 }
 
+// Начисляем бонусы юзеру
+export const addBonusesToUserBalance = async (user, bonusAmount) => {
+    const balance = Number(user.balance) || 0
+    const newBalance = balance + bonusAmount
+    await db.collection('barber-users').doc(String(user.id)).update({ balance: newBalance })
+    return newBalance
+}
+
+// Отправляем юзеру уведомление о начислении
+export const noticeUserAboutBonusAccrual = async (user, bonusAmount) => {
+    const message = `💸 Тебе начислено <b>${bonusAmount}</b> бонусов на баланс за оплату услуг!`
+    await sendBotMessage(user.id, message)
+}
+
+// Отправляем админам уведомление о начислении
+export const noticeAdminsAboutBonusAccrual = async (user, amount, bonusAmount) => {
+    const message = `<b>💸 Начисление бонусов</b>
+
+<b>Клиент:</b> ${getUserLink(user)}
+<b>Сумма оплаты:</b> ${amount} ₽
+<b>Начислено:</b> ${bonusAmount} ₽`
+    await sendBotMessage(ADMIN_CHAT_ID, message)
+}
+
 export const bonusRewardForReferral = async (id, referral) => {
     const { userRef, userData } = await getUserById(id)
 

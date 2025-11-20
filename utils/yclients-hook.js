@@ -1,6 +1,7 @@
 import app from '../config/express.js'
 import dayjs from 'dayjs'
 import {
+    addBonusesToUserBalance,
     addNewEntryToNoticesCron,
     bonusRewardForReferral,
     deleteNoticeByRecordId,
@@ -10,6 +11,8 @@ import {
     noticeAboutPayServicesByUser,
     noticeAboutRewardForReferral,
     noticeAboutUpdateEntry,
+    noticeAdminsAboutBonusAccrual,
+    noticeUserAboutBonusAccrual,
     sendDebugMessage,
     setUserSendReview,
     setUserUsedServices,
@@ -17,6 +20,59 @@ import {
 } from './helpers.js'
 import { sendReviewRateMessage } from '../composers/review.composer.js'
 import { exec } from 'child_process'
+
+const handleReferralReward = async (user) => {
+    // Если кем-то приглашен и еще не посещал барбершоп
+    if (user.invited_from && !user.used_services) {
+        // Помечаем рефералу, что он пользовался услугами (used_services = true)
+        await setUserUsedServices(user.id)
+        // Начисляем бонусы юзеру за реферала и помечаем (used_services = true)
+        const rewardInfo = await bonusRewardForReferral(user.invited_from, user)
+        // Оповещаем юзера и админов о награждении за реферала
+        await noticeAboutRewardForReferral(rewardInfo, user)
+    }
+}
+
+const haircutId = 15803024
+const waitingMs = 600000
+const waitingMin = waitingMs / 60000
+
+const handleReviewMessage = async (user, sold_item_id) => {
+    // Отправка просьбы об отзыве если операция соответствует отслеживаемой (id)
+    if (!user.send_review && sold_item_id === haircutId) {
+        await setUserSendReview(user.id)
+        await noticeAboutPayServicesByUser(user, waitingMin)
+        // Отправляем просьбу об отзыве через заданное время
+        setTimeout(() => {
+            sendReviewRateMessage(user)
+        }, waitingMs)
+    }
+}
+
+const bonusMultiplier = 0.05
+
+const handleSendBonuses = async (user, amount, paid_full) => {
+    // Проверяем, что оплата прошла полностью
+    if (paid_full !== 1) {
+        return
+    }
+
+    const paidAmount = Number(amount)
+    // Проверяем валидность суммы оплаты
+    if (!paidAmount || paidAmount <= 0) {
+        return
+    }
+
+    // Считаем сумму бонусов к начислению
+    const bonusAmount = Number((paidAmount * bonusMultiplier).toFixed(2))
+    if (!bonusAmount) {
+        return
+    }
+
+    await addBonusesToUserBalance(user, bonusAmount)
+    await noticeUserAboutBonusAccrual(user, bonusAmount)
+    await noticeAdminsAboutBonusAccrual(user, paidAmount, bonusAmount)
+}
 
 app.get('/reload-formula', async (req, res) => {
     console.log('Вебхук перезапуска')
@@ -41,8 +97,9 @@ app.post('/hook', async (req, res) => {
     console.log(bodyLog, req.body)
     await sendDebugMessage(bodyLog, req.body)
 
-    const { status, resource, data } = req.body
-    const { staff, client, date, id, sold_item_id } = data
+    const { status, resource, data, record } = req.body
+    const { staff, client, date, id, sold_item_id, amount } = data
+    const { paid_full } = record
 
     if (!client || !client.phone) {
         return
@@ -88,29 +145,13 @@ app.post('/hook', async (req, res) => {
     // Обработка финансовых операций
     if (user && resource === 'finances_operation') {
         switch (status) {
-            // Фин. операция для первого посещения
             case 'create':
-                // Если кем-то приглашен и еще не посещал барбершоп
-                if (user.invited_from && !user.used_services) {
-                    // Помечаем рефералу, что он пользовался услугами (used_services = true)
-                    await setUserUsedServices(user.id)
-                    // Начисляем бонусы юзеру за реферала и помечаем (used_services = true)
-                    const rewardInfo = await bonusRewardForReferral(user.invited_from, user)
-                    // Оповещаем юзера и админов о награждении за реферала
-                    await noticeAboutRewardForReferral(rewardInfo, user)
-                }
-                // Отправка просьбы об отзыве и операция соответствует отслеживаемой (id)
-                const haircutId = 15803024
-                if (!user.send_review && sold_item_id === haircutId) {
-                    const waitingMs = 600000
-                    const waitingMin = waitingMs / 60000
-                    await setUserSendReview(user.id)
-                    await noticeAboutPayServicesByUser(user, waitingMin)
-                    // Отправляем просьбу об отзыве через заданное время
-                    setTimeout(() => {
-                        sendReviewRateMessage(user)
-                    }, waitingMs)
-                }
+                // Проверяем на реферала
+                await handleReferralReward(user)
+                // Проверям на отзыв
+                await handleReviewMessage(user, sold_item_id)
+                // Начисляем бонусы
+                await handleSendBonuses(user, amount, paid_full)
                 break
             default:
                 const log = `Необрабатываемый вебхук, ресурс: ${resource}, статус : ${status}`
