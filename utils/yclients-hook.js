@@ -53,7 +53,7 @@ const bonusMultiplier = 0.05
 
 const handleSendBonuses = async (user, amount, paid_full) => {
     // Проверяем, что оплата прошла полностью
-    if (paid_full !== 1) {
+    if (paid_full && paid_full !== 1) {
         return
     }
 
@@ -99,7 +99,6 @@ app.post('/hook', async (req, res) => {
 
     const { status, resource, data } = req.body
     const { staff, client, date, id, sold_item_id, amount, record } = data
-    const { paid_full } = record
 
     if (!client || !client.phone) {
         return
@@ -151,7 +150,7 @@ app.post('/hook', async (req, res) => {
                 // Проверям на отзыв
                 await handleReviewMessage(user, sold_item_id)
                 // Начисляем бонусы
-                await handleSendBonuses(user, amount, paid_full)
+                await handleSendBonuses(user, amount, record?.paid_full)
                 break
             default:
                 const log = `Необрабатываемый вебхук, ресурс: ${resource}, статус : ${status}`
