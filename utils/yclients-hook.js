@@ -97,8 +97,8 @@ app.post('/hook', async (req, res) => {
     console.log(bodyLog, req.body)
     await sendDebugMessage(bodyLog, req.body)
 
-    const { status, resource, data, record } = req.body
-    const { staff, client, date, id, sold_item_id, amount } = data
+    const { status, resource, data } = req.body
+    const { staff, client, date, id, sold_item_id, amount, record } = data
     const { paid_full } = record
 
     if (!client || !client.phone) {
