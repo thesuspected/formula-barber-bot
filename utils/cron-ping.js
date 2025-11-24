@@ -264,7 +264,7 @@ const launchNoticeCron = async () => {
         console.log(`${hoursDiff} часа до записи.`)
 
         // Если не отправляли уведомление за сутки и N часов до записи, отправялем уведомление
-        if (!notice.isNoticeBeforeDaySend && hoursDiff > 23 && hoursDiff < 24) {
+        if (!notice.isNoticeBeforeDaySend && hoursDiff >= 23 && hoursDiff <= 24) {
             getUserById(user_id).then((user) => {
                 const { userData } = user
                 const timeString = noticeDatetime.format('HH:mm')

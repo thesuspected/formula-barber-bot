@@ -13,14 +13,13 @@ import { db, Filter } from '../config/firebase.js'
 
 const { ADMIN_CHAT_ID, DEBUG_CHAT_ID } = process.env
 
+const sanitizeHtml = (text = '') => text.replace(/<[^>]*>/g, '')
+
 export const sendDebugMessage = async (log, body) => {
-    await sendBotMessage(
-        DEBUG_CHAT_ID,
-        log + `<pre><code class="language-javascript">${JSON.stringify(body, null, 2)}</code></pre>`,
-        {
-            parse_mode: 'HTML',
-        }
-    )
+    const safeText = sanitizeHtml(JSON.stringify(body, null, 2))
+    await sendBotMessage(DEBUG_CHAT_ID, log + `<pre><code class="language-javascript">${safeText}</code></pre>`, {
+        parse_mode: 'HTML',
+    })
 }
 
 export const getDateString = (date) => {
