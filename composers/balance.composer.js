@@ -17,8 +17,9 @@ const getUserData = async (ctx) => {
 const getBalanceMessage = (user) => {
     return `<u><b>${CMD.BALANCE}</b></u>: ${user.balance} ₽
 
+<blockquote>Получай 5% кэшбек бонусами с каждой оплаты!</blockquote>
 <blockquote>Получай бонусы, выполняя задания \nиз раздела <b>${CMD.BONUS}</b></blockquote>
-<blockquote>Бонусы не сгорают со временем, ими можно \nоплачивать до 50% стоимости услуг в «Формуле»</blockquote>
+<blockquote>Бонусы не сгорают со временем, ими можно \nоплачивать до 30% стоимости услуг в «Формуле»</blockquote>
 `
 }
 
