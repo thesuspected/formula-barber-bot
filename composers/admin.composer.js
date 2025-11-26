@@ -319,11 +319,23 @@ composer.use(stage.middleware())
 
 composer.action(ADMIN_ACTIONS.ADD_BONUS, async (ctx) => {
     await ctx.answerCbQuery()
+    // Удаляем сообщение с кнопками "Начислить" и "Списать"
+    try {
+        await ctx.deleteMessage()
+    } catch (e) {
+        console.log('Не удалось удалить сообщение с кнопками начисления/списания', e)
+    }
     await ctx.scene.enter(ADMIN_WIZARD.ADD_BONUS)
 })
 
 composer.action(ADMIN_ACTIONS.REMOVE_BONUS, async (ctx) => {
     await ctx.answerCbQuery()
+    // Удаляем сообщение с кнопками "Начислить" и "Списать"
+    try {
+        await ctx.deleteMessage()
+    } catch (e) {
+        console.log('Не удалось удалить сообщение с кнопками начисления/списания', e)
+    }
     await ctx.scene.enter(ADMIN_WIZARD.REMOVE_BONUS)
 })
 
