@@ -162,14 +162,11 @@ const addBonusWizardScene = new Scenes.WizardScene(
     // Начало сцены
     async (ctx) => {
         ctx.wizard.state.bonus = {}
-        await ctx.replyWithHTML(
-            `Введите кол-во к начислению ${getUserLink(ctx.session.admin_edited_user)} (макс ${ctx.session.admin_edited_user.balance}):`,
-            {
-                link_preview_options: {
-                    is_disabled: true,
-                },
-            }
-        )
+        await ctx.replyWithHTML(`Введите кол-во к начислению ${getUserLink(ctx.session.admin_edited_user)}:`, {
+            link_preview_options: {
+                is_disabled: true,
+            },
+        })
         return ctx.wizard.next()
     },
     // Получаем число бонусов
