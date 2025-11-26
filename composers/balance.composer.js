@@ -29,7 +29,7 @@ const getBalanceMessage = (user) => {
     return `<blockquote>Покажите этот QR-код администратору для списания</blockquote>
     
 ${CMD.BALANCE}: <b>${user.balance} ₽</b>
-⭐️ Твой уровень: <b>${name}</b> [Уровень ${level}]
+⭐️ Твой грейд: <b>${name}</b> [Уровень ${level}]
 
 <blockquote>- Получай <b>5% кэшбек</b> с каждой оплаты
 - Оплачивай <b>до 30% стоимости</b> услуг
