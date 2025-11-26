@@ -4,6 +4,7 @@ import { getMainKeyboard, getPhoneKeyboard } from '../keyboards.js'
 import { db } from '../config/firebase.js'
 import { sendBotMessage, tryCatchWrapper } from '../barber.js'
 import { getUserById, getUserLink, sendDebugMessage } from '../utils/helpers.js'
+import { ADMIN_ARRAY, showUserInfo } from './admin.composer.js'
 import axios from 'axios'
 import dayjs from 'dayjs'
 
@@ -292,7 +293,28 @@ const writeNewUser = async (ctx) => {
 // start
 composer.start(async (ctx) => {
     if (ctx.payload) {
-        // TODO: Добавить проверку на привязку к аккаунту пригласившему этот
+        // Если админ открывает бонусный QR-код клиента
+        if (ctx.payload.startsWith('bonus_')) {
+            // Проверяем на админа
+            if (!ADMIN_ARRAY.includes(ctx.from.username)) {
+                const errLog = `⛔️ Пользователь ${getUserLink(ctx.from)} попытался открыть бонусный QR через /start, не имея прав на это`
+                console.log(errLog)
+                await sendBotMessage(ADMIN_CHAT_ID, errLog)
+                return
+            }
+
+            const userId = ctx.payload.replace('bonus_', '')
+            const { userData } = await getUserById(userId)
+            if (!userData) {
+                await ctx.replyWithHTML(`Клиент с id "${userId}" не найден`)
+                return
+            }
+
+            await showUserInfo(ctx, userData)
+            return
+        }
+
+        // Обычная реферальная логика (старое поведение)
         console.log(`${ctx.from.username} перешел по приглашению от ${ctx.payload}`)
     }
     await tryCatchWrapper(

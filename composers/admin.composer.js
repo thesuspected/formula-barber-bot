@@ -28,7 +28,7 @@ const MARK_REASON = {
     TG: 'Телеграм',
 }
 
-const getUserInfoMessage = (user) => {
+export const getUserInfoMessage = (user) => {
     let bonus_text = ''
     if (user.bonusState) {
         const { MARK, REVIEW } = user.bonusState
@@ -48,7 +48,21 @@ const getUserInfoMessage = (user) => {
 <b>Баланс:</b> ${user.balance} ₽${bonus_text}`
 }
 
-const getUserInfoKeyboard = () => {
+export const showUserInfo = async (ctx, user) => {
+    ctx.session.admin_edited_user = user
+    if (user) {
+        await ctx.replyWithHTML(getUserInfoMessage(user), {
+            link_preview_options: {
+                is_disabled: true,
+            },
+            ...getUserInfoKeyboard(),
+        })
+    } else {
+        await ctx.replyWithHTML('Клиент не найден')
+    }
+}
+
+export const getUserInfoKeyboard = () => {
     return Markup.inlineKeyboard([
         Markup.button.callback(ADMIN_ACTIONS.ADD_BONUS, ADMIN_ACTIONS.ADD_BONUS),
         Markup.button.callback(ADMIN_ACTIONS.REMOVE_BONUS, ADMIN_ACTIONS.REMOVE_BONUS),
@@ -290,17 +304,11 @@ composer.command('user', async (ctx) => {
         return
     }
     const user = await getUserByUsername(ctx.payload)
-    ctx.session.admin_edited_user = user
-    if (user) {
-        ctx.replyWithHTML(getUserInfoMessage(user), {
-            link_preview_options: {
-                is_disabled: true,
-            },
-            ...getUserInfoKeyboard(),
-        })
-    } else {
-        ctx.replyWithHTML(`Клиент с никнеймом "${ctx.payload}" не найден`)
+    if (!user) {
+        await ctx.replyWithHTML(`Клиент с никнеймом "${ctx.payload}" не найден`)
+        return
     }
+    await showUserInfo(ctx, user)
 })
 
 composer.command('id', async (ctx) => {
@@ -317,17 +325,11 @@ composer.command('id', async (ctx) => {
         return
     }
     const { userData } = await getUserById(ctx.payload)
-    ctx.session.admin_edited_user = userData
-    if (userData) {
-        ctx.replyWithHTML(getUserInfoMessage(userData), {
-            link_preview_options: {
-                is_disabled: true,
-            },
-            ...getUserInfoKeyboard(),
-        })
-    } else {
-        ctx.replyWithHTML(`Клиент с id "${ctx.payload}" не найден`)
+    if (!userData) {
+        await ctx.replyWithHTML(`Клиент с id "${ctx.payload}" не найден`)
+        return
     }
+    await showUserInfo(ctx, userData)
 })
 
 composer.command('phone', async (ctx) => {
@@ -344,17 +346,37 @@ composer.command('phone', async (ctx) => {
         return
     }
     const user = await getUserByPhone(ctx.payload)
-    ctx.session.admin_edited_user = user
-    if (user) {
-        ctx.replyWithHTML(getUserInfoMessage(user), {
-            link_preview_options: {
-                is_disabled: true,
-            },
-            ...getUserInfoKeyboard(),
-        })
-    } else {
-        ctx.replyWithHTML(`Клиент с номером телефона "${ctx.payload}" не найден`)
+    if (!user) {
+        await ctx.replyWithHTML(`Клиент с номером телефона "${ctx.payload}" не найден`)
+        return
     }
+    await showUserInfo(ctx, user)
+})
+
+composer.hears(/bonus_(\d+)/, async (ctx) => {
+    // Проверяем на админа
+    if (!ADMIN_ARRAY.includes(ctx.from.username)) {
+        const errLog = `⛔️ Пользователь ${getUserLink(ctx.from)} попытался открыть бонусный QR, не имея прав на это`
+        console.log(errLog)
+        await sendBotMessage(ADMIN_CHAT_ID, errLog)
+        return
+    }
+
+    const match = ctx.match
+    const userId = match && match[1]
+
+    if (!userId) {
+        await ctx.replyWithHTML('Некорректная ссылка для бонусного QR-кода')
+        return
+    }
+
+    const { userData } = await getUserById(userId)
+    if (!userData) {
+        await ctx.replyWithHTML(`Клиент с id "${userId}" не найден`)
+        return
+    }
+
+    await showUserInfo(ctx, userData)
 })
 
 const getAllUsers = async () => {
