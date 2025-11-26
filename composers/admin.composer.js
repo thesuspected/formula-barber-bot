@@ -3,6 +3,7 @@ import { getUserById, getUserByPhone, getUserByUsername, getUserLink } from '../
 import { BONUS_REVIEW } from './bonus.const.js'
 import { db } from '../config/firebase.js'
 import { sendBotMessage } from '../barber.js'
+import { setUserBalanceAndBonusLevel } from '../utils/helpers.js'
 
 const { ADMIN_CHAT_ID } = process.env
 
@@ -116,19 +117,23 @@ const addBonusToClient = async (user, payload, reason_text) => {
         bonusState[main_reason_key][sub_reason_key] = true
     }
     const userRef = db.collection('barber-users').doc(String(user.id))
-    await userRef.update({ balance: user.balance + count, bonusState })
+    const currentBalance = Number(user.balance) || 0
+    const newBalance = currentBalance + count
+    await userRef.update({ bonusState })
+    await setUserBalanceAndBonusLevel(user, newBalance)
     // Оповещаем клиента
     const message_text = `Вам начислено ${count} бонусов за ${reason_text}`
     await sendBotMessage(user.id, message_text)
 }
 
 const removeBonusFromClient = async (user, count) => {
-    const userRef = db.collection('barber-users').doc(String(user.id))
     // Если бонусов меньше, чем запросили
     if (user.balance < count) {
         return
     }
-    await userRef.update({ balance: user.balance - count })
+    const currentBalance = Number(user.balance) || 0
+    const newBalance = currentBalance - count
+    await setUserBalanceAndBonusLevel(user, newBalance)
     // Оповещаем клиента
     const message_text = `С вашего баланса списано ${count} бонусов в счет услуг барбершопа 💸`
     await sendBotMessage(user.id, message_text)

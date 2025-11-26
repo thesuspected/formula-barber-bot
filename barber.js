@@ -78,6 +78,26 @@ export async function sendBotMessage(chatId, text, extra) {
     }
 }
 
+// Send photo with caption
+export async function sendBotPhoto(chatId, photoPath, caption, extra) {
+    try {
+        const sourcePath = photoPath.replace(/^\//, '')
+        await bot.telegram.sendPhoto(
+            chatId,
+            { source: sourcePath },
+            {
+                caption,
+                parse_mode: 'HTML',
+                ...extra,
+            }
+        )
+        return true
+    } catch (e) {
+        console.error(`Ошибка отправки фото: ${e}. Путь: ${photoPath}. chat_id: ${chatId}`)
+        return false
+    }
+}
+
 // Try Catch
 export async function tryCatchWrapper(fn) {
     try {

@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 import { dateLocales } from '../const.js'
-import { sendBotMessage } from '../barber.js'
+import { sendBotMessage, sendBotPhoto } from '../barber.js'
+import { BONUS_GRADES, BONUS_GRADES_VALUES } from '../composers/bonus.const.js'
 import {
     getDeleteEntryAdminMessage,
     getDeleteEntryUserMessage,
@@ -60,6 +61,45 @@ export const noticeAboutPayServicesByUser = async (user, waitingMin) => {
     const log = `💸 Клиент ${getUserLink(user)} оплатил услуги, через ${waitingMin} минут запрошу отзыв`
     console.log(log)
     await sendBotMessage(ADMIN_CHAT_ID, log)
+}
+
+const getBonusLevelByBalance = (balance) => {
+    const numericBalance = Number(balance) || 0
+    let targetLevel = 0
+    Object.keys(BONUS_GRADES)
+        .map((key) => Number(key))
+        .sort((a, b) => a - b)
+        .forEach((level) => {
+            const grade = BONUS_GRADES[level]
+            if (grade && numericBalance >= grade.bonuses) {
+                targetLevel = level
+            }
+        })
+    return targetLevel
+}
+
+export const setUserBalanceAndBonusLevel = async (user, newBalance) => {
+    const userId = String(user.id)
+    const userRef = db.collection('barber-users').doc(userId)
+
+    const prevLevel = typeof user.bonus_level === 'number' ? user.bonus_level : 0
+    const nextLevel = getBonusLevelByBalance(newBalance)
+
+    await userRef.update({
+        balance: newBalance,
+        bonus_level: nextLevel,
+    })
+
+    // Отправляем сообщение только при повышении уровня
+    if (nextLevel > prevLevel) {
+        const grade = BONUS_GRADES[nextLevel]
+        const text = BONUS_GRADES_VALUES[nextLevel]
+        if (grade && text) {
+            await sendBotPhoto(user.id, grade.url, text)
+        }
+    }
+
+    return nextLevel
 }
 
 export const setUserSendReview = async (user_id) => {
@@ -198,7 +238,7 @@ export const setUserUsedServices = async (user_id) => {
 export const addBonusesToUserBalance = async (user, bonusAmount) => {
     const balance = Number(user.balance) || 0
     const newBalance = balance + bonusAmount
-    await db.collection('barber-users').doc(String(user.id)).update({ balance: newBalance })
+    await setUserBalanceAndBonusLevel(user, newBalance)
     return newBalance
 }
 
@@ -261,8 +301,10 @@ export const bonusRewardForReferral = async (id, referral) => {
     console.log('invited =', invited)
     await userRef.update({ invited })
 
-    // Начисляем вознаграждение
-    await userRef.update({ balance: userData.balance + bonus_reward })
+    // Начисляем вознаграждение и обновляем уровень
+    const currentBalance = Number(userData.balance) || 0
+    const newBalance = currentBalance + bonus_reward
+    await setUserBalanceAndBonusLevel(userData, newBalance)
 
     return {
         user: userData,

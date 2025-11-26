@@ -5,6 +5,7 @@ import { CMD } from '../const.js'
 import _ from 'lodash'
 import { getUserLink } from '../utils/helpers.js'
 import { tryCatchWrapper } from '../barber.js'
+import { BONUS_GRADES } from './bonus.const.js'
 
 const composer = new Composer()
 
@@ -24,10 +25,37 @@ const getUserData = async (ctx) => {
     return (await db.collection('barber-users').doc(userId).get()).data()
 }
 
+const getUserLevelInfo = (user) => {
+    const balance = Number(user.balance) || 0
+    const savedLevel = typeof user.bonus_level === 'number' ? user.bonus_level : 0
+
+    // На всякий случай пересчитываем уровень от баланса, если bonus_level ещё не был выставлен
+    let level = 0
+    Object.keys(BONUS_GRADES)
+        .map((key) => Number(key))
+        .sort((a, b) => a - b)
+        .forEach((lvl) => {
+            const grade = BONUS_GRADES[lvl]
+            if (grade && balance >= grade.bonuses) {
+                level = lvl
+            }
+        })
+
+    const finalLevel = savedLevel || level
+    const grade = BONUS_GRADES[finalLevel] || BONUS_GRADES[0]
+
+    return {
+        level: finalLevel,
+        name: grade.name,
+    }
+}
+
 const getBalanceMessage = (user) => {
+    const { level, name } = getUserLevelInfo(user)
     return `<blockquote>Покажите этот QR-код администратору для списания</blockquote>
     
 ${CMD.BALANCE}: <b>${user.balance} ₽</b>
+⭐️ Твой уровень: <b>${name}</b> [Уровень ${level}]
 
 <blockquote>- Получай <b>5% кэшбек</b> с каждой оплаты
 - Оплачивай <b>до 30% стоимости</b> услуг
