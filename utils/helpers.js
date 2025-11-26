@@ -84,14 +84,23 @@ export const setUserBalanceAndBonusLevel = async (user, newBalance) => {
 
     const prevLevel = typeof user.bonus_level === 'number' ? user.bonus_level : 0
     const nextLevel = getBonusLevelByBalance(newBalance)
+    const prevBalance = Number(user.balance) || 0
 
     await userRef.update({
         balance: newBalance,
         bonus_level: nextLevel,
     })
 
-    // Отправляем сообщение только при повышении уровня
-    if (nextLevel > prevLevel) {
+    const shouldSendZeroLevel =
+        prevLevel === 0 &&
+        nextLevel === 0 &&
+        prevBalance === 0 &&
+        newBalance > 0 &&
+        newBalance < (BONUS_GRADES[1]?.bonuses ?? 50)
+
+    // Отправляем сообщение при повышении уровня
+    // или при первом начислении бонусов в рамках 0 уровня
+    if (nextLevel > prevLevel || shouldSendZeroLevel) {
         const grade = BONUS_GRADES[nextLevel]
         const text = BONUS_GRADES_VALUES[nextLevel]
         if (grade && text) {
