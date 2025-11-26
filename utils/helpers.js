@@ -78,6 +78,21 @@ const getBonusLevelByBalance = (balance) => {
     return targetLevel
 }
 
+export const getUserLevelInfo = (user) => {
+    const balance = Number(user.balance) || 0
+    const savedLevel = typeof user.bonus_level === 'number' ? user.bonus_level : 0
+
+    // На всякий случай пересчитываем уровень от баланса, если bonus_level ещё не был выставлен
+    const calculatedLevel = getBonusLevelByBalance(balance)
+    const finalLevel = savedLevel || calculatedLevel
+    const grade = BONUS_GRADES[finalLevel] || BONUS_GRADES[0]
+
+    return {
+        level: finalLevel,
+        name: grade.name,
+    }
+}
+
 export const setUserBalanceAndBonusLevel = async (user, newBalance) => {
     const userId = String(user.id)
     const userRef = db.collection('barber-users').doc(userId)

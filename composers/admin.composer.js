@@ -1,5 +1,5 @@
 import { Composer, Markup, Scenes } from 'telegraf'
-import { getUserById, getUserByPhone, getUserByUsername, getUserLink } from '../utils/helpers.js'
+import { getUserById, getUserByPhone, getUserByUsername, getUserLink, getUserLevelInfo } from '../utils/helpers.js'
 import { BONUS_REVIEW } from './bonus.const.js'
 import { db } from '../config/firebase.js'
 import { sendBotMessage } from '../barber.js'
@@ -483,6 +483,44 @@ composer.command('push', async (ctx) => {
         }
     }
     console.log('errorUsers', errorUsers)
+})
+
+composer.command('top', async (ctx) => {
+    // Проверяем на админа
+    if (!ADMIN_ARRAY.includes(ctx.from.username)) {
+        const errLog = `⛔️ Пользователь ${getUserLink(ctx.from)} попытался отправить команду /top, не имея прав на это`
+        console.log(errLog)
+        await sendBotMessage(ADMIN_CHAT_ID, errLog)
+        return
+    }
+
+    const usersRef = db.collection('barber-users')
+    const snapshot = await usersRef.orderBy('balance', 'desc').limit(10).get()
+
+    if (snapshot.empty) {
+        await ctx.replyWithHTML('Пока нет клиентов с балансом для формирования топа')
+        return
+    }
+
+    const lines = []
+    let index = 1
+
+    snapshot.forEach((doc) => {
+        const user = doc.data()
+        const balance = Number(user.balance) || 0
+        const link = getUserLink(user)
+        const { level, name } = getUserLevelInfo(user)
+
+        lines.push(`${index}. ${balance} ₽ [Ур. ${level}] ${link}: - ${name}`)
+        index += 1
+    })
+
+    const message = `<b>Топ-10 клиентов по балансу</b>\n\n${lines.join('\n')}`
+    await ctx.replyWithHTML(message, {
+        link_preview_options: {
+            is_disabled: true,
+        },
+    })
 })
 
 export default composer

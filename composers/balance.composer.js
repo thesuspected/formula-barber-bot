@@ -3,9 +3,8 @@ import { Composer, Markup } from 'telegraf'
 import QRCode from 'qrcode'
 import { CMD } from '../const.js'
 import _ from 'lodash'
-import { getUserLink } from '../utils/helpers.js'
+import { getUserLink, getUserLevelInfo } from '../utils/helpers.js'
 import { tryCatchWrapper } from '../barber.js'
-import { BONUS_GRADES } from './bonus.const.js'
 
 const composer = new Composer()
 
@@ -23,31 +22,6 @@ const QR_CODE_OPTIONS = {
 const getUserData = async (ctx) => {
     const userId = String(ctx.from.id)
     return (await db.collection('barber-users').doc(userId).get()).data()
-}
-
-const getUserLevelInfo = (user) => {
-    const balance = Number(user.balance) || 0
-    const savedLevel = typeof user.bonus_level === 'number' ? user.bonus_level : 0
-
-    // На всякий случай пересчитываем уровень от баланса, если bonus_level ещё не был выставлен
-    let level = 0
-    Object.keys(BONUS_GRADES)
-        .map((key) => Number(key))
-        .sort((a, b) => a - b)
-        .forEach((lvl) => {
-            const grade = BONUS_GRADES[lvl]
-            if (grade && balance >= grade.bonuses) {
-                level = lvl
-            }
-        })
-
-    const finalLevel = savedLevel || level
-    const grade = BONUS_GRADES[finalLevel] || BONUS_GRADES[0]
-
-    return {
-        level: finalLevel,
-        name: grade.name,
-    }
 }
 
 const getBalanceMessage = (user) => {
