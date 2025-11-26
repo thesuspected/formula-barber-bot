@@ -290,8 +290,36 @@ const writeNewUser = async (ctx) => {
     }
 }
 
+const getUserCommands = () => [
+    { command: 'start', description: 'Запустить бота' },
+    { command: 'balance', description: 'Показать бонусный баланс' },
+]
+
+const getAdminCommands = () => [
+    ...getUserCommands(),
+    { command: 'user', description: 'Найти клиента по никнейму' },
+    { command: 'id', description: 'Найти клиента по Telegram ID' },
+    { command: 'phone', description: 'Найти клиента по номеру телефона' },
+    { command: 'push', description: 'Отправить рассылку' },
+    { command: 'top', description: 'Топ-10 клиентов по балансу' },
+]
+
 // start
 composer.start(async (ctx) => {
+    const isAdmin = ADMIN_ARRAY.includes(ctx.from.username)
+    const commands = isAdmin ? getAdminCommands() : getUserCommands()
+
+    try {
+        await ctx.telegram.setMyCommands(commands, {
+            scope: {
+                type: 'chat',
+                chat_id: ctx.chat.id,
+            },
+        })
+    } catch (e) {
+        console.log('Не удалось установить список команд для чата', ctx.chat.id, e)
+    }
+
     if (ctx.payload) {
         // Если админ открывает бонусный QR-код клиента
         if (ctx.payload.startsWith('bonus_')) {
