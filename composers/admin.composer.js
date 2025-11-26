@@ -78,8 +78,8 @@ const getBonusReasonKeyboard = () => {
             Markup.button.callback(BONUS_REASON.MARK, BONUS_REASON.MARK),
         ],
         [
-            (Markup.button.callback(BONUS_REASON.WITHOUT, BONUS_REASON.WITHOUT),
-            Markup.button.callback(BONUS_REASON.OTHER, BONUS_REASON.OTHER)),
+            Markup.button.callback(BONUS_REASON.WITHOUT, BONUS_REASON.WITHOUT),
+            Markup.button.callback(BONUS_REASON.OTHER, BONUS_REASON.OTHER),
         ],
     ]).resize()
 }
