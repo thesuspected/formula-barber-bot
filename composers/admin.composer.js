@@ -188,6 +188,12 @@ const addBonusWizardScene = new Scenes.WizardScene(
             return
         }
         await ctx.answerCbQuery()
+        // Удаляем сообщение "Выберите причину начисления" с кнопками
+        try {
+            await ctx.deleteMessage()
+        } catch (e) {
+            console.log('Не удалось удалить сообщение с выбором причины начисления', e)
+        }
         const main_reason = ctx.update.callback_query.data
         ctx.wizard.state.bonus.main_reason = main_reason
         ctx.wizard.state.bonus.main_reason_key = getObjectKey(BONUS_REASON, main_reason)
