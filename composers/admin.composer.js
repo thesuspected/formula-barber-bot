@@ -19,10 +19,10 @@ const ADMIN_WIZARD = {
     REMOVE_BONUS: 'REMOVE_BONUS',
 }
 const BONUS_REASON = {
-    WITHOUT: '💸 Без причины',
     REVIEW: '💬 Отзыв',
     MARK: '📌 Отметка',
-    OTHER: '📢 Другое',
+    WITHOUT: '💸 Без причины',
+    OTHER: '📢 Ввести причину',
 }
 const MARK_REASON = {
     VK: 'Вконтакте',
@@ -73,10 +73,14 @@ export const getUserInfoKeyboard = () => {
 
 const getBonusReasonKeyboard = () => {
     return Markup.inlineKeyboard([
-        Markup.button.callback(BONUS_REASON.WITHOUT, BONUS_REASON.WITHOUT),
-        Markup.button.callback(BONUS_REASON.REVIEW, BONUS_REASON.REVIEW),
-        Markup.button.callback(BONUS_REASON.MARK, BONUS_REASON.MARK),
-        Markup.button.callback(BONUS_REASON.OTHER, BONUS_REASON.OTHER),
+        [
+            Markup.button.callback(BONUS_REASON.REVIEW, BONUS_REASON.REVIEW),
+            Markup.button.callback(BONUS_REASON.MARK, BONUS_REASON.MARK),
+        ],
+        [
+            (Markup.button.callback(BONUS_REASON.WITHOUT, BONUS_REASON.WITHOUT),
+            Markup.button.callback(BONUS_REASON.OTHER, BONUS_REASON.OTHER)),
+        ],
     ]).resize()
 }
 
