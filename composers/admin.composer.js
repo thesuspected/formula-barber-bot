@@ -114,7 +114,7 @@ const addBonusToClient = async (user, payload, reason_text) => {
         await setUserBalanceAndBonusLevel(user, newBalance)
         const message_text = `💸 Тебе начислено ${count} бонусов на баланс`
         await sendBotMessage(user.id, message_text)
-        return
+        return count
     }
 
     let bonusState = user.bonusState ?? {
