@@ -121,6 +121,16 @@ export const setUserBalanceAndBonusLevel = async (user, newBalance) => {
         if (grade && text) {
             await sendBotPhoto(user.id, grade.url, text)
         }
+
+        if (grade) {
+            const adminText = `<b>⭐️ Повышение уровня лояльности</b>
+
+<b>Клиент:</b> ${getUserLink(user)}
+<b>Предыдущий уровень:</b> ${prevLevel}
+<b>Новый уровень:</b> ${nextLevel} — ${grade.name}
+<b>Текущий баланс:</b> ${newBalance} ₽`
+            await sendBotMessage(ADMIN_CHAT_ID, adminText)
+        }
     }
 
     return nextLevel
