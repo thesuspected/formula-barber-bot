@@ -19,6 +19,7 @@ const ADMIN_WIZARD = {
     REMOVE_BONUS: 'REMOVE_BONUS',
 }
 const BONUS_REASON = {
+    WITHOUT: '💸 Без причины',
     REVIEW: '💬 Отзыв',
     MARK: '📌 Отметка',
     OTHER: '📢 Другое',
@@ -72,6 +73,7 @@ export const getUserInfoKeyboard = () => {
 
 const getBonusReasonKeyboard = () => {
     return Markup.inlineKeyboard([
+        Markup.button.callback(BONUS_REASON.WITHOUT, BONUS_REASON.WITHOUT),
         Markup.button.callback(BONUS_REASON.REVIEW, BONUS_REASON.REVIEW),
         Markup.button.callback(BONUS_REASON.MARK, BONUS_REASON.MARK),
         Markup.button.callback(BONUS_REASON.OTHER, BONUS_REASON.OTHER),
@@ -100,6 +102,17 @@ const getObjectKey = (obj, value) => {
 
 const addBonusToClient = async (user, payload, reason_text) => {
     const { count, main_reason, main_reason_key, sub_reason_key } = payload
+
+    // Без причины — фиксированное начисление бонусов с стандартным текстом
+    if (main_reason === BONUS_REASON.WITHOUT) {
+        const currentBalance = Number(user.balance) || 0
+        const newBalance = currentBalance + count
+        await setUserBalanceAndBonusLevel(user, newBalance)
+        const message_text = `💸 Тебе начислено ${count} бонусов на баланс`
+        await sendBotMessage(user.id, message_text)
+        return
+    }
+
     let bonusState = user.bonusState ?? {
         REVIEW: {
             YANDEX: false,
@@ -122,7 +135,7 @@ const addBonusToClient = async (user, payload, reason_text) => {
     await userRef.update({ bonusState })
     await setUserBalanceAndBonusLevel(user, newBalance)
     // Оповещаем клиента
-    const message_text = `Вам начислено ${count} бонусов за ${reason_text}`
+    const message_text = `💸 Тебе начислено ${count} бонусов на баланс за ${reason_text}`
     await sendBotMessage(user.id, message_text)
 }
 
@@ -175,6 +188,25 @@ const addBonusWizardScene = new Scenes.WizardScene(
         ctx.wizard.state.bonus.main_reason = main_reason
         ctx.wizard.state.bonus.main_reason_key = getObjectKey(BONUS_REASON, main_reason)
         switch (main_reason) {
+            // Без причины — сразу начисляем фиксированные бонусы
+            case BONUS_REASON.WITHOUT: {
+                const appliedCount = await addBonusToClient(
+                    ctx.session.admin_edited_user,
+                    { ...ctx.wizard.state.bonus, main_reason },
+                    ''
+                )
+                const message_text = `➕ Начисление\n\nКлиенту ${getUserLink(
+                    ctx.session.admin_edited_user
+                )} начислено ${appliedCount} бонусов`
+                await ctx.replyWithHTML(message_text, {
+                    link_preview_options: {
+                        is_disabled: true,
+                    },
+                })
+                await sendBotMessage(ADMIN_CHAT_ID, message_text)
+                ctx.wizard.state.bonus = {}
+                return ctx.scene.leave()
+            }
             // За отзывы
             case BONUS_REASON.REVIEW:
                 await ctx.replyWithHTML('Выберите платформу, на которой оставили отзыв', getReviewReasonKeyboard())
