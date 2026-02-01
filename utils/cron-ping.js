@@ -307,7 +307,7 @@ const launchNoticeCron = async () => {
         console.log(`${hoursDiff} часа до записи.`)
 
         // Если меньше N часов до записи, отправялем уведомление
-        if (hoursDiff < 1.6) {
+        if (hoursDiff < 1.1) {
             getUserById(user_id).then((user) => {
                 const { userData } = user
                 const timeString = noticeDatetime.format('HH:mm')
