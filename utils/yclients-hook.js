@@ -34,6 +34,7 @@ const handleReferralReward = async (user) => {
 }
 
 const haircutId = 15803024
+const consultationId = 26523359
 const waitingMs = 600000
 const waitingMin = waitingMs / 60000
 
@@ -51,9 +52,14 @@ const handleReviewMessage = async (user, sold_item_id) => {
 
 const bonusMultiplier = 0.05
 
-const handleSendBonuses = async (user, amount, paid_full) => {
-    // Проверяем, что оплата прошла полностью
+const handleSendBonuses = async (user, amount, sold_item_id, paid_full) => {
+    // Проверяем, что услуга не является товаром
+    if (sold_item_id === consultationId) {
+        return
+    }
+
     if (paid_full && paid_full !== 1) {
+        // Проверяем, что оплата прошла полностью
         return
     }
 
@@ -150,7 +156,7 @@ app.post('/hook', async (req, res) => {
                 // Проверям на отзыв
                 await handleReviewMessage(user, sold_item_id)
                 // Начисляем бонусы
-                await handleSendBonuses(user, amount, record?.paid_full)
+                await handleSendBonuses(user, amount, sold_item_id, record?.paid_full)
                 break
             default:
                 const log = `Необрабатываемый вебхук, ресурс: ${resource}, статус : ${status}`
