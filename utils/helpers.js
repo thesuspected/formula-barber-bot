@@ -18,7 +18,7 @@ const sanitizeHtml = (text = '') => text.replace(/<[^>]*>/g, '')
 
 export const sendDebugMessage = async (log, body) => {
     const safeText = sanitizeHtml(JSON.stringify(body, null, 2))
-    await sendBotMessage(DEBUG_CHAT_ID, log + `<pre><code class="language-javascript">${safeText}</code></pre>`, {
+    return await sendBotMessage(DEBUG_CHAT_ID, log + `<pre><code class="language-javascript">${safeText}</code></pre>`, {
         parse_mode: 'HTML',
     })
 }
