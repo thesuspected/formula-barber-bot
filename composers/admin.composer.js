@@ -171,6 +171,13 @@ const addBonusWizardScene = new Scenes.WizardScene(
     },
     // Получаем число бонусов
     async (ctx) => {
+        if (!ctx.message?.text) {
+            if (ctx.update?.callback_query) {
+                await ctx.answerCbQuery()
+            }
+            await ctx.replyWithHTML('Введите количество бонусов числом')
+            return
+        }
         const count = Number(ctx.message.text)
         // validation
         if (!count || count < 1) {
@@ -292,6 +299,13 @@ const removeBonusWizardScene = new Scenes.WizardScene(
     },
     // Получаем число бонусов
     async (ctx) => {
+        if (!ctx.message?.text) {
+            if (ctx.update?.callback_query) {
+                await ctx.answerCbQuery()
+            }
+            await ctx.replyWithHTML('Введите количество бонусов числом')
+            return
+        }
         const count = Number(ctx.message.text)
         // validation
         if (!count || count < 1) {
